@@ -4,52 +4,105 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kalkulator Ratecard Influencer</title>
-  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
     * { box-sizing: border-box; }
 
     /* ===== LIGHT THEME ===== */
-    :root, [data-theme="light"] {
-      --bg:           #f8fafc;
-      --card:         #ffffff;
-      --border:       #e2e8f0;
-      --foreground:   #0f172a;
-      --muted:        #64748b;
-      --primary:      #6366f1;
-      --primary-fg:   #ffffff;
-      --accent:       #f1f5f9;
-      --input-bg:     #f8fafc;
-      --result-bg:    #f8fafc;
-      --shadow:       rgba(0,0,0,0.06);
+    [data-theme="light"] {
+      --bg:        #f8fafc;
+      --card:      #ffffff;
+      --border:    #e2e8f0;
+      --fg:        #0f172a;
+      --muted:     #64748b;
+      --primary:   #6366f1;
+      --pfg:       #ffffff;
+      --accent:    #f1f5f9;
+      --inputbg:   #f8fafc;
     }
 
     /* ===== DARK THEME ===== */
     [data-theme="dark"] {
-      --bg:           #0f172a;
-      --card:         #1e293b;
-      --border:       #334155;
-      --foreground:   #f1f5f9;
-      --muted:        #94a3b8;
-      --primary:      #818cf8;
-      --primary-fg:   #0f172a;
-      --accent:       #1e293b;
-      --input-bg:     #0f172a;
-      --result-bg:    #0f172a;
-      --shadow:       rgba(0,0,0,0.3);
+      --bg:        #0f172a;
+      --card:      #1e293b;
+      --border:    #334155;
+      --fg:        #f1f5f9;
+      --muted:     #94a3b8;
+      --primary:   #818cf8;
+      --pfg:       #0f172a;
+      --accent:    #1e293b;
+      --inputbg:   #0f172a;
     }
 
     body {
       background-color: var(--bg);
-      color: var(--foreground);
-      transition: background-color 0.3s ease, color 0.3s ease;
+      color: var(--fg);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      transition: background-color 0.3s, color 0.3s;
+      min-height: 100vh;
+      padding: 16px;
     }
 
     .card {
       background: var(--card);
       border: 1px solid var(--border);
-      transition: background-color 0.3s ease, border-color 0.3s ease;
+      border-radius: 16px;
+      transition: background 0.3s, border-color 0.3s;
     }
 
+    /* Dark toggle button */
+    #theme-toggle {
+      display: inline-flex !important;
+      align-items: center;
+      gap: 6px;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      color: var(--fg);
+      border-radius: 9999px;
+      padding: 7px 16px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.2s;
+      outline: none;
+    }
+    #theme-toggle:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* Platform tabs */
+    .tab-btn {
+      padding: 8px 20px;
+      border-radius: 9999px;
+      font-weight: 600;
+      font-size: 14px;
+      border: 1.5px solid var(--border);
+      background: var(--card);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: var(--primary);
+      color: var(--pfg);
+      border-color: var(--primary);
+      box-shadow: 0 2px 10px rgba(99,102,241,0.3);
+    }
+
+    /* Input / Select */
+    .f-input, .f-select {
+      width: 100%;
+      background: var(--inputbg);
+      border: 1.5px solid var(--border);
+      color: var(--fg);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s, background 0.3s;
+      display: block;
+    }
+    .f-input:focus, .f-select:focus { border-color: var(--primary); }
+
+    /* Range slider */
     input[type=range] {
       -webkit-appearance: none;
       appearance: none;
@@ -63,620 +116,514 @@
     }
     input[type=range]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      appearance: none;
-      width: 18px;
-      height: 18px;
+      width: 18px; height: 18px;
       border-radius: 50%;
       background: var(--primary);
       cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
     input[type=range]::-moz-range-thumb {
-      width: 18px;
-      height: 18px;
+      width: 18px; height: 18px;
       border-radius: 50%;
       background: var(--primary);
-      cursor: pointer;
-      border: none;
+      cursor: pointer; border: none;
     }
 
-    .tab-btn.active {
-      background: var(--primary);
-      color: var(--primary-fg);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-    .tab-btn {
-      transition: all 0.2s;
-      color: var(--muted);
-      background: var(--card);
-      border: 1px solid var(--border);
-    }
-
+    /* Badges */
     .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 2px 10px;
-      border-radius: 9999px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
+      display: inline-flex; align-items: center;
+      padding: 2px 10px; border-radius: 9999px;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.05em; text-transform: uppercase;
     }
-    .tier-badge-nano    { background: #d1fae5; color: #065f46; }
-    .tier-badge-micro   { background: #dbeafe; color: #1e40af; }
-    .tier-badge-mid     { background: #ede9fe; color: #5b21b6; }
-    .tier-badge-macro   { background: #fef3c7; color: #92400e; }
-    .tier-badge-mega    { background: #fee2e2; color: #991b1b; }
+    [data-theme="light"] .b-nano  { background:#d1fae5; color:#065f46; }
+    [data-theme="light"] .b-micro { background:#dbeafe; color:#1e40af; }
+    [data-theme="light"] .b-mid   { background:#ede9fe; color:#5b21b6; }
+    [data-theme="light"] .b-macro { background:#fef3c7; color:#92400e; }
+    [data-theme="light"] .b-mega  { background:#fee2e2; color:#991b1b; }
+    [data-theme="dark"]  .b-nano  { background:#064e3b; color:#6ee7b7; }
+    [data-theme="dark"]  .b-micro { background:#1e3a5f; color:#93c5fd; }
+    [data-theme="dark"]  .b-mid   { background:#3b0764; color:#c4b5fd; }
+    [data-theme="dark"]  .b-macro { background:#451a03; color:#fcd34d; }
+    [data-theme="dark"]  .b-mega  { background:#450a0a; color:#fca5a5; }
 
-    [data-theme="dark"] .tier-badge-nano  { background: #064e3b; color: #6ee7b7; }
-    [data-theme="dark"] .tier-badge-micro { background: #1e3a5f; color: #93c5fd; }
-    [data-theme="dark"] .tier-badge-mid   { background: #3b0764; color: #c4b5fd; }
-    [data-theme="dark"] .tier-badge-macro { background: #451a03; color: #fcd34d; }
-    [data-theme="dark"] .tier-badge-mega  { background: #450a0a; color: #fca5a5; }
-
-    .ig-gradient { background: linear-gradient(135deg, #f9a8d4, #c084fc, #60a5fa); }
-    .tt-gradient { background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); }
-
-    .number-input, select {
-      background: var(--input-bg);
-      border: 1px solid var(--border);
-      color: var(--foreground);
-      border-radius: 8px;
-      padding: 6px 12px;
-      font-size: 0.9rem;
-      width: 100%;
-      outline: none;
-      transition: border-color 0.2s, background 0.3s, color 0.3s;
-    }
-    .number-input:focus, select:focus { border-color: var(--primary); }
-
-    select { padding: 6px 10px; font-size: 0.85rem; cursor: pointer; }
-
+    /* Result row */
     .result-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 14px;
-      border-radius: 10px;
-      margin-bottom: 8px;
-      background: var(--result-bg);
-      border: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 14px; border-radius: 10px; margin-bottom: 8px;
+      background: var(--inputbg); border: 1.5px solid var(--border);
       transition: background 0.3s, border-color 0.3s;
     }
     .result-row.highlight { border-color: var(--primary); }
 
-    .tooltip { position: relative; cursor: help; }
-    .tooltip .tip-text {
-      visibility: hidden;
-      width: 200px;
-      background: var(--foreground);
-      color: var(--bg);
-      text-align: center;
-      border-radius: 8px;
-      padding: 6px 10px;
-      font-size: 0.72rem;
-      position: absolute;
-      z-index: 10;
-      bottom: 125%;
-      left: 50%;
-      margin-left: -100px;
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-    .tooltip:hover .tip-text { visibility: visible; opacity: 1; }
-
-    .animate-fade { animation: fadeIn 0.3s ease; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-
-    /* Dark mode toggle button */
-    #theme-toggle {
-      background: var(--card);
-      border: 1px solid var(--border);
-      color: var(--foreground);
-      border-radius: 9999px;
-      padding: 6px 14px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s;
-    }
-    #theme-toggle:hover { border-color: var(--primary); color: var(--primary); }
-
-    table { width: 100%; font-size: 0.75rem; border-collapse: collapse; }
-    th { text-align: left; padding: 8px; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--border); }
-    td { padding: 8px; color: var(--foreground); border-bottom: 1px solid var(--border); }
-    tr:hover td { background: var(--accent); transition: background 0.15s; }
-    tr:last-child td { border-bottom: none; }
-
+    /* Method buttons */
     .method-btn {
-      flex: 1;
-      font-size: 0.75rem;
-      padding: 4px 0;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px solid var(--border);
-      transition: all 0.2s;
+      flex: 1; font-size: 12px; padding: 5px 0;
+      border-radius: 8px; font-weight: 600; cursor: pointer;
+      border: 1.5px solid var(--border); transition: all 0.2s;
+      background: var(--card); color: var(--muted);
     }
-    .method-btn.active { background: var(--primary); color: var(--primary-fg); border-color: var(--primary); }
-    .method-btn:not(.active) { background: var(--card); color: var(--muted); }
+    .method-btn.active {
+      background: var(--primary); color: var(--pfg); border-color: var(--primary);
+    }
 
-    .tier-info-card {
+    /* Tier info card */
+    .tier-card {
       background: linear-gradient(135deg, var(--card), var(--accent));
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 16px; padding: 16px; margin-bottom: 16px;
       transition: background 0.3s, border-color 0.3s;
     }
 
-    .section-label {
-      font-size: 0.65rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted);
-      margin-bottom: 6px;
+    /* Table */
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th { text-align: left; padding: 8px; color: var(--muted); font-weight: 600;
+         border-bottom: 1.5px solid var(--border); }
+    td { padding: 8px; color: var(--fg); border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--accent); transition: background 0.15s; }
+
+    /* Section label */
+    .slabel {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--muted); margin-bottom: 8px;
     }
+
+    /* Gradients */
+    .ig-grad { background: linear-gradient(135deg,#f9a8d4,#c084fc,#60a5fa); }
+    .tt-grad { background: linear-gradient(135deg,#1a1a2e,#16213e,#0f3460); }
+
+    /* Tooltip */
+    .tip { position: relative; cursor: help; border-bottom: 1px dashed var(--muted); }
+    .tip .tipbox {
+      display: none; position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%);
+      width: 200px; background: var(--fg); color: var(--bg);
+      padding: 6px 10px; border-radius: 8px; font-size: 11px; text-align: center;
+      z-index: 20; white-space: normal;
+    }
+    .tip:hover .tipbox { display: block; }
+
+    @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+    .fadein { animation: fadeIn 0.3s ease; }
+
+    /* Grid layout */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    @media (min-width: 768px) {
+      .main-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    .flex { display: flex; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+    .gap-2 { gap: 8px; }
+    .gap-3 { gap: 12px; }
+    .gap-4 { gap: 16px; }
+    .mb-1 { margin-bottom: 4px; }
+    .mb-2 { margin-bottom: 8px; }
+    .mb-3 { margin-bottom: 12px; }
+    .mb-4 { margin-bottom: 16px; }
+    .mb-5 { margin-bottom: 20px; }
+    .mb-6 { margin-bottom: 24px; }
+    .mt-1 { margin-top: 4px; }
+    .mt-2 { margin-top: 8px; }
+    .mt-3 { margin-top: 12px; }
+    .mt-4 { margin-top: 16px; }
+    .mt-5 { margin-top: 20px; }
+    .p-3 { padding: 12px; }
+    .p-4 { padding: 16px; }
+    .p-5 { padding: 20px; }
+    .pt-4 { padding-top: 16px; }
+    .text-right { text-align: right; }
+    .text-center { text-align: center; }
+    .overflow-x-auto { overflow-x: auto; }
+    .w-full { width: 100%; }
+    .hidden { display: none !important; }
+    .items-center { align-items: center; }
+    .justify-center { justify-content: center; }
+    .max-w-4xl { max-width: 896px; margin: 0 auto; }
   </style>
 </head>
-<body class="antialiased p-4 min-h-screen">
+<body>
+<div class="max-w-4xl">
 
-  <div class="max-w-4xl mx-auto">
+  <!-- Header -->
+  <div class="flex-between mb-6">
+    <div>
+      <h1 style="font-size:22px;font-weight:800;color:var(--fg);margin:0 0 2px">💰 Kalkulator Ratecard</h1>
+      <p style="font-size:13px;color:var(--muted);margin:0">Estimasi harga endorsement Instagram & TikTok</p>
+    </div>
+    <button id="theme-toggle" onclick="toggleTheme()">
+      <span id="theme-icon">🌙</span>
+      <span id="theme-label">Dark Mode</span>
+    </button>
+  </div>
 
-    <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
-      <div>
-        <h1 class="text-2xl font-bold" style="color:var(--foreground)">💰 Kalkulator Ratecard</h1>
-        <p class="text-sm" style="color:var(--muted)">Estimasi harga endorsement Instagram & TikTok</p>
+  <!-- Platform Tabs -->
+  <div class="flex justify-center gap-3 mb-6">
+    <button id="tab-ig" class="tab-btn active" onclick="switchPlatform('ig')">📸 Instagram</button>
+    <button id="tab-tt" class="tab-btn" onclick="switchPlatform('tt')">🎵 TikTok</button>
+  </div>
+
+  <!-- Main Grid -->
+  <div class="main-grid">
+
+    <!-- LEFT: Input -->
+    <div class="card p-5">
+
+      <!-- Platform header -->
+      <div id="ph-ig" class="flex gap-3 items-center mb-5">
+        <div class="ig-grad" style="width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff">📸</div>
+        <div>
+          <div style="font-weight:700;color:var(--fg)">Instagram</div>
+          <div style="font-size:12px;color:var(--muted)">Feed · Reels · Story · Carousel</div>
+        </div>
       </div>
-      <button id="theme-toggle" onclick="toggleTheme()">
-        <span id="theme-icon">🌙</span>
-        <span id="theme-label">Dark</span>
-      </button>
-    </div>
-
-    <!-- Platform Tab -->
-    <div class="flex gap-3 justify-center mb-6">
-      <button id="tab-ig" class="tab-btn active px-5 py-2 rounded-full font-semibold text-sm" onclick="switchPlatform('ig')">
-        📸 Instagram
-      </button>
-      <button id="tab-tt" class="tab-btn px-5 py-2 rounded-full font-semibold text-sm" onclick="switchPlatform('tt')">
-        🎵 TikTok
-      </button>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-
-      <!-- LEFT: Input Panel -->
-      <div class="card rounded-2xl p-5 shadow-sm">
-
-        <!-- Platform Header -->
-        <div id="platform-header-ig" class="flex items-center gap-3 mb-5">
-          <div class="ig-gradient w-10 h-10 rounded-xl flex items-center justify-center text-white text-lg shadow">📸</div>
-          <div>
-            <div class="font-semibold" style="color:var(--foreground)">Instagram</div>
-            <div class="text-xs" style="color:var(--muted)">Feed · Reels · Story · Carousel</div>
-          </div>
+      <div id="ph-tt" class="hidden flex gap-3 items-center mb-5">
+        <div class="tt-grad" style="width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff">🎵</div>
+        <div>
+          <div style="font-weight:700;color:var(--fg)">TikTok</div>
+          <div style="font-size:12px;color:var(--muted)">Video · Live · Spark Ads · Review</div>
         </div>
-        <div id="platform-header-tt" class="hidden flex items-center gap-3 mb-5">
-          <div class="tt-gradient w-10 h-10 rounded-xl flex items-center justify-center text-white text-lg shadow">🎵</div>
-          <div>
-            <div class="font-semibold" style="color:var(--foreground)">TikTok</div>
-            <div class="text-xs" style="color:var(--muted)">Video · Live · Spark Ads · Review</div>
-          </div>
-        </div>
+      </div>
 
-        <!-- Followers -->
-        <div class="mb-5">
-          <div class="flex justify-between items-center mb-2">
-            <label class="text-sm font-medium tooltip" style="color:var(--foreground)">
-              Jumlah Followers
-              <span class="tip-text">Total followers akun kamu saat ini</span>
-            </label>
-            <span id="tier-badge" class="badge tier-badge-micro">Micro</span>
-          </div>
-          <input type="number" id="followers-input" class="number-input mb-2" value="50000" min="1000" max="100000000" oninput="syncSlider()" />
-          <input type="range" id="followers-slider" min="1000" max="10000000" step="1000" value="50000" oninput="syncInput()" />
-          <div class="flex justify-between text-xs mt-1" style="color:var(--muted)">
-            <span>1K</span><span>100K</span><span>1M</span><span>10M+</span>
-          </div>
-        </div>
-
-        <!-- Engagement Rate -->
-        <div class="mb-5">
-          <div class="flex justify-between items-center mb-2">
-            <label class="text-sm font-medium tooltip" style="color:var(--foreground)">
-              Engagement Rate (ER)
-              <span class="tip-text">ER = (Likes+Comments+Shares) / Followers × 100%. Ideal: IG 3–6%, TT 5–9%</span>
-            </label>
-            <span id="er-label" class="text-sm font-bold" style="color:var(--primary)">3.0%</span>
-          </div>
-          <input type="range" id="er-slider" min="0.1" max="20" step="0.1" value="3.0" oninput="updateER()" />
-          <div class="flex justify-between text-xs mt-1" style="color:var(--muted)">
-            <span>0.1%</span><span>5%</span><span>10%</span><span>20%</span>
-          </div>
-          <div id="er-quality" class="mt-2 text-xs text-center py-1 px-3 rounded-full w-fit mx-auto" style="background:var(--result-bg);border:1px solid var(--border);color:var(--muted)">Rata-rata</div>
-        </div>
-
-        <!-- Niche -->
-        <div class="mb-4">
-          <label class="text-sm font-medium block mb-2 tooltip" style="color:var(--foreground)">
-            Kategori / Niche
-            <span class="tip-text">Niche premium (Finance, Tech) biasanya rate lebih tinggi</span>
+      <!-- Followers -->
+      <div class="mb-5">
+        <div class="flex-between mb-2">
+          <label class="tip" style="font-size:13px;font-weight:600;color:var(--fg)">
+            Jumlah Followers
+            <span class="tipbox">Total followers akun kamu saat ini</span>
           </label>
-          <select id="niche-select" onchange="calculate()">
-            <option value="1.0">🌟 Lifestyle & Daily Vlog</option>
-            <option value="1.1">💄 Beauty & Fashion</option>
-            <option value="1.2">🍔 Food & Culinary</option>
-            <option value="1.3">✈️ Travel & Adventure</option>
-            <option value="1.4">💪 Health & Fitness</option>
-            <option value="1.5">💻 Tech & Gadget</option>
-            <option value="1.6">💰 Finance & Investing</option>
-            <option value="1.2">🎮 Gaming & Esports</option>
-            <option value="1.0">😂 Entertainment & Comedy</option>
-            <option value="1.3">📚 Education & Tutorial</option>
-            <option value="1.1">🏠 Home & Interior</option>
-            <option value="1.2">👶 Parenting & Family</option>
-          </select>
+          <span id="tier-badge" class="badge b-micro">Micro</span>
         </div>
-
-        <!-- Location -->
-        <div class="mb-5">
-          <label class="text-sm font-medium block mb-2" style="color:var(--foreground)">Lokasi / Market</label>
-          <select id="location-select" onchange="calculate()">
-            <option value="1.0">🇮🇩 Indonesia (IDR)</option>
-            <option value="1.5">🇸🇬 Singapore (SGD)</option>
-            <option value="2.0">🇺🇸 USA / Global (USD)</option>
-            <option value="1.3">🇲🇾 Malaysia (MYR)</option>
-            <option value="1.2">🇵🇭 Philippines (PHP)</option>
-          </select>
-        </div>
-
-        <!-- Method -->
-        <div class="rounded-xl p-3" style="background:var(--result-bg);border:1px solid var(--border)">
-          <div class="section-label">Metode Kalkulasi</div>
-          <div class="flex gap-2">
-            <button id="method-standard" class="method-btn active" onclick="setMethod('standard')">Standard</button>
-            <button id="method-cpm" class="method-btn" onclick="setMethod('cpm')">CPM Based</button>
-          </div>
-          <div id="cpm-input-row" class="hidden mt-3">
-            <label class="text-xs" style="color:var(--muted)">CPM (per 1.000 impresi)</label>
-            <input type="number" id="cpm-value" class="number-input mt-1" value="50000" oninput="calculate()" />
-            <div class="text-xs mt-1" style="color:var(--muted)">Avg reach ~20–30% dari followers</div>
-          </div>
+        <input type="number" id="followers-input" class="f-input mb-2" value="50000" min="1000" max="100000000" oninput="syncSlider()" />
+        <input type="range" id="followers-slider" min="1000" max="10000000" step="1000" value="50000" oninput="syncInput()" />
+        <div class="flex-between mt-1" style="font-size:11px;color:var(--muted)">
+          <span>1K</span><span>100K</span><span>1M</span><span>10M+</span>
         </div>
       </div>
 
-      <!-- RIGHT: Results Panel -->
-      <div>
-        <!-- Tier Card -->
-        <div class="tier-info-card animate-fade">
-          <div class="flex items-center justify-between mb-1">
-            <span class="font-semibold" id="tier-title" style="color:var(--foreground)">Micro Influencer</span>
-            <span id="tier-badge-large" class="badge tier-badge-micro">Micro</span>
-          </div>
-          <p class="text-xs" id="tier-desc" style="color:var(--muted)">10K–100K followers. Komunitas engaged dan niche. Cocok untuk brand awareness lokal.</p>
+      <!-- ER -->
+      <div class="mb-5">
+        <div class="flex-between mb-2">
+          <label class="tip" style="font-size:13px;font-weight:600;color:var(--fg)">
+            Engagement Rate (ER)
+            <span class="tipbox">ER = (Likes+Comments+Shares)/Followers×100%. Ideal IG 3–6%, TT 5–9%</span>
+          </label>
+          <span id="er-label" style="font-size:13px;font-weight:700;color:var(--primary)">3.0%</span>
         </div>
+        <input type="range" id="er-slider" min="0.1" max="20" step="0.1" value="3.0" oninput="updateER()" />
+        <div class="flex-between mt-1" style="font-size:11px;color:var(--muted)">
+          <span>0.1%</span><span>5%</span><span>10%</span><span>20%</span>
+        </div>
+        <div id="er-quality" class="text-center mt-2" style="font-size:12px;padding:3px 12px;border-radius:9999px;border:1px solid var(--border);width:fit-content;margin:8px auto 0;color:var(--muted)">Rata-rata</div>
+      </div>
 
-        <!-- Content Rates -->
-        <div class="card rounded-2xl p-5 shadow-sm animate-fade">
-          <h3 class="font-semibold text-sm mb-1" style="color:var(--foreground)">💸 Estimasi Harga per Konten</h3>
-          <p class="text-xs mb-4" id="currency-note" style="color:var(--muted)">dalam Rupiah (IDR)</p>
+      <!-- Niche -->
+      <div class="mb-4">
+        <label style="font-size:13px;font-weight:600;color:var(--fg);display:block;margin-bottom:6px">Kategori / Niche</label>
+        <select id="niche-select" class="f-select" onchange="calculate()">
+          <option value="1.0">🌟 Lifestyle & Daily Vlog</option>
+          <option value="1.1">💄 Beauty & Fashion</option>
+          <option value="1.2">🍔 Food & Culinary</option>
+          <option value="1.3">✈️ Travel & Adventure</option>
+          <option value="1.4">💪 Health & Fitness</option>
+          <option value="1.5">💻 Tech & Gadget</option>
+          <option value="1.6">💰 Finance & Investing</option>
+          <option value="1.2">🎮 Gaming & Esports</option>
+          <option value="1.0">😂 Entertainment & Comedy</option>
+          <option value="1.3">📚 Education & Tutorial</option>
+        </select>
+      </div>
 
-          <div id="content-rates"></div>
+      <!-- Location -->
+      <div class="mb-5">
+        <label style="font-size:13px;font-weight:600;color:var(--fg);display:block;margin-bottom:6px">Lokasi / Market</label>
+        <select id="location-select" class="f-select" onchange="calculate()">
+          <option value="1.0">🇮🇩 Indonesia (IDR)</option>
+          <option value="1.5">🇸🇬 Singapore (SGD)</option>
+          <option value="2.0">🇺🇸 USA / Global (USD)</option>
+          <option value="1.3">🇲🇾 Malaysia (MYR)</option>
+          <option value="1.2">🇵🇭 Philippines (PHP)</option>
+        </select>
+      </div>
 
-          <div class="mt-4 pt-4" style="border-top:1px solid var(--border)">
-            <div class="flex justify-between items-center mb-2">
-              <span class="text-sm font-semibold" style="color:var(--foreground)">📦 Paket Full Campaign</span>
-            </div>
-            <div id="package-rates"></div>
-          </div>
-
-          <!-- Tips -->
-          <div class="mt-4 rounded-xl p-3" style="background:var(--result-bg);border:1px solid var(--border)">
-            <div class="section-label">💡 Tips Negosiasi</div>
-            <ul class="text-xs space-y-1" id="tips-list" style="color:var(--muted)"></ul>
-          </div>
+      <!-- Method -->
+      <div class="p-3" style="background:var(--inputbg);border:1.5px solid var(--border);border-radius:12px">
+        <div class="slabel">Metode Kalkulasi</div>
+        <div class="flex gap-2">
+          <button id="method-standard" class="method-btn active" onclick="setMethod('standard')">Standard</button>
+          <button id="method-cpm" class="method-btn" onclick="setMethod('cpm')">CPM Based</button>
+        </div>
+        <div id="cpm-input-row" class="hidden mt-3">
+          <label style="font-size:12px;color:var(--muted)">CPM (per 1.000 impresi)</label>
+          <input type="number" id="cpm-value" class="f-input mt-1" value="50000" oninput="calculate()" />
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">Avg reach ~20–30% dari followers</div>
         </div>
       </div>
     </div>
 
-    <!-- Comparison Table -->
-    <div class="card rounded-2xl p-5 shadow-sm mt-5">
-      <h3 class="font-semibold mb-4" style="color:var(--foreground)">📊 Tabel Perbandingan Tier Influencer</h3>
-      <div class="overflow-x-auto">
-        <table>
-          <thead>
-            <tr>
-              <th>Tier</th>
-              <th>Followers</th>
-              <th>IG Feed (IDR)</th>
-              <th>IG Reels (IDR)</th>
-              <th>TikTok Video (IDR)</th>
-              <th>ER Ideal</th>
-            </tr>
-          </thead>
-          <tbody id="tier-table-body"></tbody>
-        </table>
+    <!-- RIGHT: Results -->
+    <div>
+      <!-- Tier card -->
+      <div class="tier-card fadein">
+        <div class="flex-between mb-1">
+          <span id="tier-title" style="font-weight:700;color:var(--fg)">Micro Influencer</span>
+          <span id="tier-badge-lg" class="badge b-micro">Micro</span>
+        </div>
+        <p id="tier-desc" style="font-size:12px;color:var(--muted);margin:0">10K–100K followers. Komunitas engaged dan niche. Cocok untuk brand awareness lokal.</p>
       </div>
-    </div>
 
-    <!-- Disclaimer -->
-    <div class="mt-4 text-center text-xs pb-6" style="color:var(--muted)">
-      ⚠️ Estimasi indikatif. Harga aktual bervariasi tergantung negosiasi, kualitas konten, eksklusivitas, dan ketentuan brand.
+      <!-- Content rates -->
+      <div class="card p-5 fadein">
+        <div style="font-weight:700;font-size:14px;color:var(--fg);margin-bottom:2px">💸 Estimasi Harga per Konten</div>
+        <div id="currency-note" style="font-size:12px;color:var(--muted);margin-bottom:16px">dalam Rupiah (IDR)</div>
+
+        <div id="content-rates"></div>
+
+        <div class="pt-4 mt-4" style="border-top:1.5px solid var(--border)">
+          <div style="font-weight:700;font-size:13px;color:var(--fg);margin-bottom:10px">📦 Paket Full Campaign</div>
+          <div id="package-rates"></div>
+        </div>
+
+        <!-- Tips -->
+        <div class="p-3 mt-4" style="background:var(--inputbg);border:1.5px solid var(--border);border-radius:12px">
+          <div class="slabel">💡 Tips Negosiasi</div>
+          <ul id="tips-list" style="font-size:12px;color:var(--muted);margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px"></ul>
+        </div>
+      </div>
     </div>
   </div>
 
-  <script>
-    // ===== THEME =====
-    function toggleTheme() {
-      const html = document.documentElement;
-      const isDark = html.getAttribute('data-theme') === 'dark';
-      const next = isDark ? 'light' : 'dark';
-      html.setAttribute('data-theme', next);
-      localStorage.setItem('theme', next);
-      document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
-      document.getElementById('theme-label').textContent = next === 'dark' ? 'Light' : 'Dark';
+  <!-- Table -->
+  <div class="card p-5 mt-5">
+    <div style="font-weight:700;font-size:15px;color:var(--fg);margin-bottom:16px">📊 Tabel Perbandingan Tier Influencer</div>
+    <div class="overflow-x-auto">
+      <table>
+        <thead>
+          <tr>
+            <th>Tier</th>
+            <th>Followers</th>
+            <th>IG Feed (IDR)</th>
+            <th>IG Reels (IDR)</th>
+            <th>TikTok Video (IDR)</th>
+            <th>ER Ideal</th>
+          </tr>
+        </thead>
+        <tbody id="tier-table"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Disclaimer -->
+  <div class="text-center mt-4" style="font-size:12px;color:var(--muted);padding-bottom:24px">
+    ⚠️ Estimasi indikatif. Harga aktual bervariasi tergantung negosiasi, kualitas konten, eksklusivitas, dan ketentuan brand.
+  </div>
+</div>
+
+<script>
+  // ===== THEME =====
+  function toggleTheme() {
+    const html = document.documentElement;
+    const dark = html.getAttribute('data-theme') === 'dark';
+    const next = dark ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    document.getElementById('theme-icon').textContent  = next === 'dark' ? '☀️' : '🌙';
+    document.getElementById('theme-label').textContent = next === 'dark' ? 'Light Mode' : 'Dark Mode';
+  }
+  (function(){
+    const s = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', s);
+    document.getElementById('theme-icon').textContent  = s === 'dark' ? '☀️' : '🌙';
+    document.getElementById('theme-label').textContent = s === 'dark' ? 'Light Mode' : 'Dark Mode';
+  })();
+
+  // ===== STATE =====
+  let platform = 'ig', method = 'standard';
+
+  const TIERS = [
+    { name:'Nano',  min:1000,    max:10000,   lbl:'Nano',     bc:'b-nano',
+      desc:'1K–10K followers. Sangat niche dan trusted. Konversi tinggi karena komunitas sangat dekat.',
+      igF:[150000,500000], igR:[200000,750000], igS:[75000,200000], igC:[175000,600000],
+      ttV:[200000,700000], ttL:[100000,350000], erIG:'5–9%', erTT:'7–12%' },
+    { name:'Micro', min:10000,   max:100000,  lbl:'Micro',    bc:'b-micro',
+      desc:'10K–100K followers. Komunitas engaged dan niche. Cocok untuk brand awareness lokal.',
+      igF:[500000,2500000], igR:[750000,4000000], igS:[200000,1000000], igC:[600000,3000000],
+      ttV:[700000,4500000], ttL:[350000,1500000], erIG:'3–6%', erTT:'5–9%' },
+    { name:'Mid',   min:100000,  max:500000,  lbl:'Mid-tier', bc:'b-mid',
+      desc:'100K–500K followers. Jangkauan luas dengan engagement solid. Ideal untuk campaign nasional.',
+      igF:[2500000,10000000], igR:[4000000,18000000], igS:[1000000,4000000], igC:[3000000,12000000],
+      ttV:[4500000,20000000], ttL:[1500000,6000000], erIG:'2–4%', erTT:'3–7%' },
+    { name:'Macro', min:500000,  max:1000000, lbl:'Macro',    bc:'b-macro',
+      desc:'500K–1M followers. Reach masif. Cocok untuk campaign produk nasional besar.',
+      igF:[10000000,30000000], igR:[18000000,50000000], igS:[4000000,12000000], igC:[12000000,35000000],
+      ttV:[20000000,60000000], ttL:[6000000,20000000], erIG:'1.5–3%', erTT:'2–5%' },
+    { name:'Mega',  min:1000000, max:1e9,     lbl:'Mega',     bc:'b-mega',
+      desc:'1M+ followers. Selebriti digital. Rate premium dengan negosiasi khusus via agency.',
+      igF:[30000000,150000000], igR:[50000000,250000000], igS:[12000000,60000000], igC:[35000000,180000000],
+      ttV:[60000000,300000000], ttL:[20000000,100000000], erIG:'1–2%', erTT:'1–3%' },
+  ];
+
+  const TIPS = {
+    ig: ['📌 Sertakan usage rights → harga naik 30–50%',
+         '📌 Fee eksklusivitas jika brand minta no competitor',
+         '📌 Story dengan link swipe-up lebih mahal karena CTA',
+         '📌 Reels bisa di-boost sebagai iklan → nego fee tambahan'],
+    tt: ['📌 Spark Ads: tambah fee jika konten dipakai iklan berbayar',
+         '📌 Video review produk biasanya 2–3× lebih mahal',
+         '📌 Live selling: nego per jam atau komisi penjualan',
+         '📌 Sound/jingle branding: tambah 20–40% dari harga standar'],
+  };
+
+  function getTier(f) { return TIERS.find(t => f >= t.min && f < t.max) || TIERS[4]; }
+
+  function fmt(v) {
+    if (v >= 1e9)  return 'Rp ' + (v/1e9).toFixed(1) + ' M';
+    if (v >= 1e6)  return 'Rp ' + (v/1e6).toFixed(1) + ' Jt';
+    if (v >= 1000) return 'Rp ' + (v/1000).toFixed(0) + ' Rb';
+    return 'Rp ' + v;
+  }
+
+  function erQ(er, plt) {
+    const t = plt==='ig' ? {l:1,a:3,g:6,e:10} : {l:2,a:5,g:9,e:14};
+    if (er < t.l) return {label:'⚠️ Sangat Rendah',      color:'#ef4444'};
+    if (er < t.a) return {label:'😐 Bawah Rata-rata',    color:'#f59e0b'};
+    if (er < t.g) return {label:'✅ Rata-rata Baik',      color:'#10b981'};
+    if (er < t.e) return {label:'🔥 Sangat Bagus',       color:'#8b5cf6'};
+    return              {label:'🚀 Luar Biasa!',         color:'#ec4899'};
+  }
+
+  function calculate() {
+    const f  = parseInt(document.getElementById('followers-input').value) || 50000;
+    const er = parseFloat(document.getElementById('er-slider').value);
+    const nm = parseFloat(document.getElementById('niche-select').value);
+    const lm = parseFloat(document.getElementById('location-select').value);
+    const tier = getTier(f);
+    const bER  = platform === 'ig' ? 3.0 : 5.0;
+    const mult = nm * lm * Math.pow(er / bER, 0.4);
+    const ap   = v => Math.round(v * mult / 10000) * 10000;
+
+    // Tier badges
+    ['tier-badge','tier-badge-lg'].forEach(id => {
+      const el = document.getElementById(id);
+      el.className = 'badge ' + tier.bc;
+      el.textContent = tier.lbl;
+    });
+    document.getElementById('tier-title').textContent = tier.name + ' Influencer';
+    document.getElementById('tier-desc').textContent  = tier.desc;
+
+    let cpmBase = 0;
+    if (method === 'cpm') {
+      const cpm = parseFloat(document.getElementById('cpm-value').value) || 50000;
+      cpmBase = (f * 0.25 / 1000) * cpm;
+    }
+    const c = method === 'cpm';
+
+    let ct, pkg;
+    if (platform === 'ig') {
+      const fMn=c?cpmBase*.8:ap(tier.igF[0]),  fMx=c?cpmBase*1.2:ap(tier.igF[1]);
+      const rMn=c?cpmBase*1.2:ap(tier.igR[0]), rMx=c?cpmBase*1.8:ap(tier.igR[1]);
+      const sMn=c?cpmBase*.4:ap(tier.igS[0]),  sMx=c?cpmBase*.6:ap(tier.igS[1]);
+      const cMn=c?cpmBase*.9:ap(tier.igC[0]),  cMx=c?cpmBase*1.4:ap(tier.igC[1]);
+      ct  = [{i:'🖼️',l:'Feed Post (Single Photo)',  mn:fMn,mx:fMx},
+             {i:'🎬',l:'Reels (Short Video)',        mn:rMn,mx:rMx,star:1},
+             {i:'📖',l:'Story (per set 3 frame)',    mn:sMn,mx:sMx},
+             {i:'🃏',l:'Carousel (Swipe Post)',      mn:cMn,mx:cMx}];
+      pkg = [{i:'🥉',l:'Starter (1 Story + 1 Feed)',             mn:sMn+fMn,          mx:sMx+fMx},
+             {i:'🥈',l:'Standard (1 Feed+1 Reels+3 Story)',      mn:fMn+rMn+sMn*2,    mx:fMx+rMx+sMx*2},
+             {i:'🥇',l:'Premium (2 Reels+1 Carousel+5 Story)',   mn:rMn*2+cMn+sMn*3,  mx:rMx*2+cMx+sMx*3}];
+    } else {
+      const vMn=c?cpmBase*.8:ap(tier.ttV[0]), vMx=c?cpmBase*1.2:ap(tier.ttV[1]);
+      const lMn=c?cpmBase*.5:ap(tier.ttL[0]), lMx=c?cpmBase*.8:ap(tier.ttL[1]);
+      const rvMn=vMn*1.5,rvMx=vMx*1.5,spMn=vMn*1.3,spMx=vMx*1.3;
+      ct  = [{i:'🎥',l:'Video Organic (15–60s)',        mn:vMn,mx:vMx,star:1},
+             {i:'📢',l:'Video Review Produk',           mn:rvMn,mx:rvMx},
+             {i:'⚡',l:'Spark Ads (TikTok Ads Ready)',  mn:spMn,mx:spMx},
+             {i:'🔴',l:'Live Streaming (per jam)',      mn:lMn,mx:lMx}];
+      pkg = [{i:'🥉',l:'Basic (1 Video + 1 Live 1 jam)',          mn:vMn+lMn,            mx:vMx+lMx},
+             {i:'🥈',l:'Standard (2 Video + Spark Ads)',          mn:vMn*2+spMn,         mx:vMx*2+spMx},
+             {i:'🥇',l:'Full (3 Video + Review + Spark)',         mn:vMn*3+rvMn+spMn,    mx:vMx*3+rvMx+spMx}];
     }
 
-    // Load saved theme
-    (function() {
-      const saved = localStorage.getItem('theme') || 'light';
-      document.documentElement.setAttribute('data-theme', saved);
-      document.getElementById('theme-icon').textContent = saved === 'dark' ? '☀️' : '🌙';
-      document.getElementById('theme-label').textContent = saved === 'dark' ? 'Light' : 'Dark';
-    })();
-
-    // ===== DATA =====
-    let platform = 'ig';
-    let method = 'standard';
-
-    const TIERS = [
-      { name: 'Nano',  min: 1000,    max: 10000,    label: 'Nano',        badgeClass: 'tier-badge-nano',
-        desc: '1K–10K followers. Sangat niche dan trusted. Konversi tinggi karena komunitas sangat dekat.',
-        igFeedMin: 150000,    igFeedMax: 500000,
-        igReelMin: 200000,    igReelMax: 750000,
-        igStoryMin: 75000,    igStoryMax: 200000,
-        igCarouMin: 175000,   igCarouMax: 600000,
-        ttVideoMin: 200000,   ttVideoMax: 700000,
-        ttLiveMin: 100000,    ttLiveMax: 350000,
-        erIG: '5–9%', erTT: '7–12%' },
-      { name: 'Micro', min: 10000,   max: 100000,   label: 'Micro',       badgeClass: 'tier-badge-micro',
-        desc: '10K–100K followers. Komunitas engaged dan niche. Cocok untuk brand awareness lokal.',
-        igFeedMin: 500000,    igFeedMax: 2500000,
-        igReelMin: 750000,    igReelMax: 4000000,
-        igStoryMin: 200000,   igStoryMax: 1000000,
-        igCarouMin: 600000,   igCarouMax: 3000000,
-        ttVideoMin: 700000,   ttVideoMax: 4500000,
-        ttLiveMin: 350000,    ttLiveMax: 1500000,
-        erIG: '3–6%', erTT: '5–9%' },
-      { name: 'Mid',   min: 100000,  max: 500000,   label: 'Mid-tier',    badgeClass: 'tier-badge-mid',
-        desc: '100K–500K followers. Jangkauan luas dengan engagement solid. Ideal untuk campaign nasional.',
-        igFeedMin: 2500000,   igFeedMax: 10000000,
-        igReelMin: 4000000,   igReelMax: 18000000,
-        igStoryMin: 1000000,  igStoryMax: 4000000,
-        igCarouMin: 3000000,  igCarouMax: 12000000,
-        ttVideoMin: 4500000,  ttVideoMax: 20000000,
-        ttLiveMin: 1500000,   ttLiveMax: 6000000,
-        erIG: '2–4%', erTT: '3–7%' },
-      { name: 'Macro', min: 500000,  max: 1000000,  label: 'Macro',       badgeClass: 'tier-badge-macro',
-        desc: '500K–1M followers. Reach masif. Cocok untuk campaign produk nasional besar.',
-        igFeedMin: 10000000,  igFeedMax: 30000000,
-        igReelMin: 18000000,  igReelMax: 50000000,
-        igStoryMin: 4000000,  igStoryMax: 12000000,
-        igCarouMin: 12000000, igCarouMax: 35000000,
-        ttVideoMin: 20000000, ttVideoMax: 60000000,
-        ttLiveMin: 6000000,   ttLiveMax: 20000000,
-        erIG: '1.5–3%', erTT: '2–5%' },
-      { name: 'Mega',  min: 1000000, max: 1e9,      label: 'Mega',        badgeClass: 'tier-badge-mega',
-        desc: '1M+ followers. Selebriti digital. Rate premium dengan negosiasi khusus via agency.',
-        igFeedMin: 30000000,  igFeedMax: 150000000,
-        igReelMin: 50000000,  igReelMax: 250000000,
-        igStoryMin: 12000000, igStoryMax: 60000000,
-        igCarouMin: 35000000, igCarouMax: 180000000,
-        ttVideoMin: 60000000, ttVideoMax: 300000000,
-        ttLiveMin: 20000000,  ttLiveMax: 100000000,
-        erIG: '1–2%', erTT: '1–3%' },
-    ];
-
-    const TIPS = {
-      ig: [
-        '📌 Sertakan usage rights → harga bisa naik 30–50%',
-        '📌 Tambah fee eksklusivitas jika brand minta no competitor',
-        '📌 Story dengan link swipe-up lebih mahal karena CTA langsung',
-        '📌 Reels bisa di-boost sebagai iklan → nego fee tambahan',
-      ],
-      tt: [
-        '📌 Spark Ads: tambah fee jika konten dipakai untuk iklan berbayar',
-        '📌 Video review produk biasanya 2–3× lebih mahal dari konten biasa',
-        '📌 Live selling: negosiasi per jam atau komisi penjualan',
-        '📌 Sound/jingle branding: tambah 20–40% dari harga video standar',
-      ],
-    };
-
-    function getTier(f) {
-      return TIERS.find(t => f >= t.min && f < t.max) || TIERS[TIERS.length - 1];
-    }
-
-    function fmt(val) {
-      if (val >= 1e9)  return 'Rp ' + (val / 1e9).toFixed(1) + ' M';
-      if (val >= 1e6)  return 'Rp ' + (val / 1e6).toFixed(1) + ' Jt';
-      if (val >= 1000) return 'Rp ' + (val / 1000).toFixed(0) + ' Rb';
-      return 'Rp ' + val.toLocaleString('id-ID');
-    }
-
-    function erQuality(er, plt) {
-      const t = plt === 'ig'
-        ? { low:1, avg:3, good:6, ex:10 }
-        : { low:2, avg:5, good:9, ex:14 };
-      if (er < t.low)  return { label: '⚠️ Sangat Rendah',       color: '#ef4444' };
-      if (er < t.avg)  return { label: '😐 Di Bawah Rata-rata',  color: '#f59e0b' };
-      if (er < t.good) return { label: '✅ Rata-rata Baik',       color: '#10b981' };
-      if (er < t.ex)   return { label: '🔥 Sangat Bagus',        color: '#8b5cf6' };
-      return             { label: '🚀 Luar Biasa!',             color: '#ec4899' };
-    }
-
-    function calculate() {
-      const followers = parseInt(document.getElementById('followers-input').value) || 50000;
-      const er        = parseFloat(document.getElementById('er-slider').value);
-      const nicheMult = parseFloat(document.getElementById('niche-select').value);
-      const locMult   = parseFloat(document.getElementById('location-select').value);
-      const tier      = getTier(followers);
-      const baseER    = platform === 'ig' ? 3.0 : 5.0;
-      const erMult    = Math.pow(er / baseER, 0.4);
-      const totalMult = nicheMult * locMult * erMult;
-
-      // Update tier display
-      ['tier-badge','tier-badge-large'].forEach(id => {
-        document.getElementById(id).className = `badge ${tier.badgeClass}`;
-        document.getElementById(id).textContent = tier.label;
-      });
-      document.getElementById('tier-title').textContent = tier.name + ' Influencer';
-      document.getElementById('tier-desc').textContent  = tier.desc;
-
-      const apply = v => Math.round(v * totalMult / 10000) * 10000;
-
-      let cpmBase = 0;
-      if (method === 'cpm') {
-        const cpm = parseFloat(document.getElementById('cpm-value').value) || 50000;
-        cpmBase = (followers * 0.25 / 1000) * cpm;
-      }
-      const c = method === 'cpm';
-
-      let contentTypes, packages;
-
-      if (platform === 'ig') {
-        const feedMin  = c ? cpmBase * 0.8  : apply(tier.igFeedMin);
-        const feedMax  = c ? cpmBase * 1.2  : apply(tier.igFeedMax);
-        const reelMin  = c ? cpmBase * 1.2  : apply(tier.igReelMin);
-        const reelMax  = c ? cpmBase * 1.8  : apply(tier.igReelMax);
-        const storyMin = c ? cpmBase * 0.4  : apply(tier.igStoryMin);
-        const storyMax = c ? cpmBase * 0.6  : apply(tier.igStoryMax);
-        const carouMin = c ? cpmBase * 0.9  : apply(tier.igCarouMin);
-        const carouMax = c ? cpmBase * 1.4  : apply(tier.igCarouMax);
-
-        contentTypes = [
-          { icon:'🖼️', label:'Feed Post (Single Photo)',  min:feedMin,  max:feedMax },
-          { icon:'🎬', label:'Reels (Short Video)',        min:reelMin,  max:reelMax,  star:true },
-          { icon:'📖', label:'Story (per set 3 frame)',    min:storyMin, max:storyMax },
-          { icon:'🃏', label:'Carousel (Swipe Post)',      min:carouMin, max:carouMax },
-        ];
-        packages = [
-          { icon:'🥉', label:'Starter (1 Story + 1 Feed)',               min:storyMin+feedMin,                    max:storyMax+feedMax },
-          { icon:'🥈', label:'Standard (1 Feed + 1 Reels + 3 Story)',     min:feedMin+reelMin+storyMin*2,          max:feedMax+reelMax+storyMax*2 },
-          { icon:'🥇', label:'Premium (2 Reels + 1 Carousel + 5 Story)', min:reelMin*2+carouMin+storyMin*3,       max:reelMax*2+carouMax+storyMax*3 },
-        ];
-      } else {
-        const vidMin    = c ? cpmBase * 0.8 : apply(tier.ttVideoMin);
-        const vidMax    = c ? cpmBase * 1.2 : apply(tier.ttVideoMax);
-        const liveMin   = c ? cpmBase * 0.5 : apply(tier.ttLiveMin);
-        const liveMax   = c ? cpmBase * 0.8 : apply(tier.ttLiveMax);
-        const revMin    = vidMin * 1.5, revMax  = vidMax * 1.5;
-        const sparkMin  = vidMin * 1.3, sparkMax = vidMax * 1.3;
-
-        contentTypes = [
-          { icon:'🎥', label:'Video Organic (15–60s)',          min:vidMin,   max:vidMax,   star:true },
-          { icon:'📢', label:'Video Review Produk',             min:revMin,   max:revMax },
-          { icon:'⚡', label:'Spark Ads (TikTok Ads Ready)',    min:sparkMin, max:sparkMax },
-          { icon:'🔴', label:'Live Streaming (per jam)',        min:liveMin,  max:liveMax },
-        ];
-        packages = [
-          { icon:'🥉', label:'Basic (1 Video + 1 Live 1 jam)',             min:vidMin+liveMin,               max:vidMax+liveMax },
-          { icon:'🥈', label:'Standard (2 Video + Spark Ads)',             min:vidMin*2+sparkMin,            max:vidMax*2+sparkMax },
-          { icon:'🥇', label:'Full Campaign (3 Video + Review + Spark)',   min:vidMin*3+revMin+sparkMin,     max:vidMax*3+revMax+sparkMax },
-        ];
-      }
-
-      document.getElementById('content-rates').innerHTML = contentTypes.map(ct => `
-        <div class="result-row${ct.star?' highlight':''}">
-          <div class="flex items-center gap-2">
-            <span>${ct.icon}</span>
-            <div>
-              <div class="text-xs font-medium" style="color:var(--foreground)">${ct.label}</div>
-              ${ct.star ? '<div style="color:var(--primary);font-size:0.65rem;font-weight:700">★ Paling Populer</div>' : ''}
-            </div>
+    document.getElementById('content-rates').innerHTML = ct.map(x => `
+      <div class="result-row${x.star?' highlight':''}">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:16px">${x.i}</span>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--fg)">${x.l}</div>
+            ${x.star?`<div style="font-size:11px;font-weight:700;color:var(--primary)">★ Paling Populer</div>`:''}
           </div>
-          <div class="text-right">
-            <div class="text-xs font-bold" style="color:var(--foreground)">${fmt(ct.min)}</div>
-            <div style="font-size:0.65rem;color:var(--muted)">s/d ${fmt(ct.max)}</div>
-          </div>
-        </div>`).join('');
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:13px;font-weight:700;color:var(--fg)">${fmt(x.mn)}</div>
+          <div style="font-size:11px;color:var(--muted)">s/d ${fmt(x.mx)}</div>
+        </div>
+      </div>`).join('');
 
-      document.getElementById('package-rates').innerHTML = packages.map(p => `
-        <div class="result-row">
-          <div class="text-xs font-medium" style="color:var(--foreground)">${p.icon} ${p.label}</div>
-          <div class="text-right">
-            <div class="text-xs font-bold" style="color:var(--foreground)">${fmt(p.min)}</div>
-            <div style="font-size:0.65rem;color:var(--muted)">s/d ${fmt(p.max)}</div>
-          </div>
-        </div>`).join('');
+    document.getElementById('package-rates').innerHTML = pkg.map(p => `
+      <div class="result-row">
+        <div style="font-size:12px;font-weight:600;color:var(--fg)">${p.i} ${p.l}</div>
+        <div style="text-align:right">
+          <div style="font-size:13px;font-weight:700;color:var(--fg)">${fmt(p.mn)}</div>
+          <div style="font-size:11px;color:var(--muted)">s/d ${fmt(p.mx)}</div>
+        </div>
+      </div>`).join('');
 
-      document.getElementById('tips-list').innerHTML = TIPS[platform].map(t => `<li>${t}</li>`).join('');
+    document.getElementById('tips-list').innerHTML = TIPS[platform].map(t=>`<li>${t}</li>`).join('');
 
-      const loc = document.getElementById('location-select').value;
-      document.getElementById('currency-note').textContent =
-        loc === '1.5' ? 'dalam SGD (×1.5 dari IDR)' :
-        loc === '2.0' ? 'dalam USD (×2 dari IDR)' :
-        loc === '1.3' ? 'dalam MYR (×1.3 dari IDR)' :
-        loc === '1.2' ? 'dalam PHP (×1.2 dari IDR)' :
-        'dalam Rupiah (IDR)';
+    const loc = document.getElementById('location-select').value;
+    document.getElementById('currency-note').textContent =
+      loc==='1.5'?'dalam SGD (×1.5 dari IDR)':loc==='2.0'?'dalam USD (×2 dari IDR)':
+      loc==='1.3'?'dalam MYR (×1.3 dari IDR)':loc==='1.2'?'dalam PHP (×1.2 dari IDR)':'dalam Rupiah (IDR)';
 
-      const q = erQuality(er, platform);
-      const erEl = document.getElementById('er-quality');
-      erEl.textContent = q.label;
-      erEl.style.color = q.color;
-      erEl.style.borderColor = q.color;
-    }
+    const q = erQ(er, platform);
+    const el = document.getElementById('er-quality');
+    el.textContent = q.label; el.style.color = q.color; el.style.borderColor = q.color;
+  }
 
-    function syncSlider() {
-      const v = parseInt(document.getElementById('followers-input').value) || 1000;
-      document.getElementById('followers-slider').value = Math.min(v, 10000000);
-      calculate();
-    }
-    function syncInput() {
-      document.getElementById('followers-input').value = document.getElementById('followers-slider').value;
-      calculate();
-    }
-    function updateER() {
-      document.getElementById('er-label').textContent = parseFloat(document.getElementById('er-slider').value).toFixed(1) + '%';
-      calculate();
-    }
-
-    function switchPlatform(p) {
-      platform = p;
-      document.getElementById('tab-ig').className = `tab-btn${p==='ig'?' active':''} px-5 py-2 rounded-full font-semibold text-sm`;
-      document.getElementById('tab-tt').className = `tab-btn${p==='tt'?' active':''} px-5 py-2 rounded-full font-semibold text-sm`;
-      document.getElementById('platform-header-ig').classList.toggle('hidden', p !== 'ig');
-      document.getElementById('platform-header-tt').classList.toggle('hidden', p !== 'tt');
-      calculate();
-    }
-
-    function setMethod(m) {
-      method = m;
-      document.getElementById('method-standard').classList.toggle('active', m === 'standard');
-      document.getElementById('method-cpm').classList.toggle('active', m === 'cpm');
-      document.getElementById('cpm-input-row').classList.toggle('hidden', m !== 'cpm');
-      calculate();
-    }
-
-    function buildTable() {
-      document.getElementById('tier-table-body').innerHTML = TIERS.map(t => `
-        <tr>
-          <td><span class="badge ${t.badgeClass}">${t.name}</span></td>
-          <td>${t.min >= 1e6 ? (t.min/1e6)+'M+' : t.min >= 1000 ? (t.min/1000)+'K' : t.min}–${t.max >= 1e6 ? (t.max/1e6)+'M' : t.max >= 1000 ? (t.max/1000)+'K' : t.max}</td>
-          <td>${fmt(t.igFeedMin)}–${fmt(t.igFeedMax)}</td>
-          <td>${fmt(t.igReelMin)}–${fmt(t.igReelMax)}</td>
-          <td>${fmt(t.ttVideoMin)}–${fmt(t.ttVideoMax)}</td>
-          <td><div>IG: ${t.erIG}</div><div style="color:var(--muted);font-size:0.7rem">TT: ${t.erTT}</div></td>
-        </tr>`).join('');
-    }
-
-    buildTable();
+  function syncSlider() {
+    document.getElementById('followers-slider').value = Math.min(parseInt(document.getElementById('followers-input').value)||1000,10000000);
     calculate();
-  </script>
+  }
+  function syncInput() {
+    document.getElementById('followers-input').value = document.getElementById('followers-slider').value;
+    calculate();
+  }
+  function updateER() {
+    document.getElementById('er-label').textContent = parseFloat(document.getElementById('er-slider').value).toFixed(1)+'%';
+    calculate();
+  }
+  function switchPlatform(p) {
+    platform = p;
+    document.getElementById('tab-ig').className = 'tab-btn'+(p==='ig'?' active':'');
+    document.getElementById('tab-tt').className = 'tab-btn'+(p==='tt'?' active':'');
+    document.getElementById('ph-ig').classList.toggle('hidden', p!=='ig');
+    document.getElementById('ph-tt').classList.toggle('hidden', p!=='tt');
+    calculate();
+  }
+  function setMethod(m) {
+    method = m;
+    document.getElementById('method-standard').classList.toggle('active', m==='standard');
+    document.getElementById('method-cpm').classList.toggle('active', m==='cpm');
+    document.getElementById('cpm-input-row').classList.toggle('hidden', m!=='cpm');
+    calculate();
+  }
+
+  // Build table
+  document.getElementById('tier-table').innerHTML = TIERS.map(t=>`
+    <tr>
+      <td><span class="badge ${t.bc}">${t.name}</span></td>
+      <td>${t.min>=1e6?(t.min/1e6)+'M+':t.min>=1000?(t.min/1000)+'K':t.min}–${t.max>=1e6?(t.max/1e6)+'M':t.max>=1000?(t.max/1000)+'K':t.max}</td>
+      <td>${fmt(t.igF[0])}–${fmt(t.igF[1])}</td>
+      <td>${fmt(t.igR[0])}–${fmt(t.igR[1])}</td>
+      <td>${fmt(t.ttV[0])}–${fmt(t.ttV[1])}</td>
+      <td><div>IG: ${t.erIG}</div><div style="color:var(--muted);font-size:11px">TT: ${t.erTT}</div></td>
+    </tr>`).join('');
+
+  calculate();
+</script>
 </body>
 </html>
