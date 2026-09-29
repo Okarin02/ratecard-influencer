@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kalkulator Ratecard Influencer</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 9999px;
+      background: var(--border);
+      outline: none;
+      cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    }
+    input[type=range]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+      border: none;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: var(--primary-foreground);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .tab-btn {
+      transition: all 0.2s;
+    }
+
+    .rate-card {
+      background: linear-gradient(135deg, var(--card), var(--accent));
+      border: 1px solid var(--border);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 10px;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .tier-badge-nano    { background: #d1fae5; color: #065f46; }
+    .tier-badge-micro   { background: #dbeafe; color: #1e40af; }
+    .tier-badge-mid     { background: #ede9fe; color: #5b21b6; }
+    .tier-badge-macro   { background: #fef3c7; color: #92400e; }
+    .tier-badge-mega    { background: #fee2e2; color: #991b1b; }
+
+    .ig-gradient { background: linear-gradient(135deg, #f9a8d4, #c084fc, #60a5fa); }
+    .tt-gradient { background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); }
+
+    .number-input {
+      background: var(--background);
+      border: 1px solid var(--border);
+      color: var(--foreground);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 0.9rem;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .number-input:focus {
+      border-color: var(--primary);
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      background: var(--background);
+      border: 1px solid var(--border);
+    }
+
+    .tooltip {
+      position: relative;
+      cursor: help;
+    }
+    .tooltip .tip-text {
+      visibility: hidden;
+      width: 200px;
+      background: var(--foreground);
+      color: var(--background);
+      text-align: center;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 0.72rem;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -100px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .tooltip:hover .tip-text { visibility: visible; opacity: 1; }
+
+    .animate-fade { animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    select {
+      background: var(--background);
+      border: 1px solid var(--border);
+      color: var(--foreground);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 0.85rem;
+      outline: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body class="bg-[var(--background)] text-[var(--foreground)] antialiased p-4 min-h-screen">
+
+  <!-- Header -->
+  <div class="max-w-4xl mx-auto">
+    <div class="text-center mb-6">
+      <h1 class="text-2xl font-bold text-[var(--foreground)] mb-1">💰 Kalkulator Ratecard Influencer</h1>
+      <p class="text-[var(--muted-foreground)] text-sm">Hitung estimasi harga endorsement Instagram & TikTok kamu</p>
+    </div>
+
+    <!-- Platform Tab -->
+    <div class="flex gap-3 justify-center mb-6">
+      <button id="tab-ig" class="tab-btn active px-5 py-2 rounded-full font-semibold text-sm" onclick="switchPlatform('ig')">
+        📸 Instagram
+      </button>
+      <button id="tab-tt" class="tab-btn px-5 py-2 rounded-full font-semibold text-sm text-[var(--muted-foreground)] bg-[var(--card)] border border-[var(--border)]" onclick="switchPlatform('tt')">
+        🎵 TikTok
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <!-- LEFT: Input Panel -->
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm">
+
+        <!-- Platform Header -->
+        <div id="platform-header-ig" class="flex items-center gap-3 mb-5">
+          <div class="ig-gradient w-10 h-10 rounded-xl flex items-center justify-center text-white text-lg font-bold shadow">📸</div>
+          <div>
+            <div class="font-semibold text-[var(--foreground)]">Instagram</div>
+            <div class="text-xs text-[var(--muted-foreground)]">Feed Post · Reels · Story · Carousel</div>
+          </div>
+        </div>
+        <div id="platform-header-tt" class="hidden flex items-center gap-3 mb-5">
+          <div class="tt-gradient w-10 h-10 rounded-xl flex items-center justify-center text-white text-lg font-bold shadow">🎵</div>
+          <div>
+            <div class="font-semibold text-[var(--foreground)]">TikTok</div>
+            <div class="text-xs text-[var(--muted-foreground)]">Video · Live · Branded Effect</div>
+          </div>
+        </div>
+
+        <!-- Followers -->
+        <div class="mb-5">
+          <div class="flex justify-between items-center mb-2">
+            <label class="text-sm font-medium text-[var(--foreground)] tooltip">
+              Jumlah Followers
+              <span class="tip-text">Masukkan total followers akun kamu saat ini</span>
+            </label>
+            <span id="tier-badge" class="badge tier-badge-micro">Micro</span>
+          </div>
+          <div class="flex items-center gap-3 mb-2">
+            <input type="number" id="followers-input" class="number-input" value="50000" min="1000" max="100000000" oninput="syncSlider()" />
+          </div>
+          <input type="range" id="followers-slider" min="1000" max="10000000" step="1000" value="50000" oninput="syncInput()" />
+          <div class="flex justify-between text-xs text-[var(--muted-foreground)] mt-1">
+            <span>1K</span><span>100K</span><span>1M</span><span>10M+</span>
+          </div>
+        </div>
+
+        <!-- Engagement Rate -->
+        <div class="mb-5">
+          <div class="flex justify-between items-center mb-2">
+            <label class="text-sm font-medium text-[var(--foreground)] tooltip">
+              Engagement Rate (ER)
+              <span class="tip-text">ER = (Likes + Comments + Shares) / Followers × 100%. ER ideal: IG 3-6%, TT 5-9%</span>
+            </label>
+            <span id="er-label" class="text-sm font-bold text-[var(--primary)]">3.0%</span>
+          </div>
+          <input type="range" id="er-slider" min="0.1" max="20" step="0.1" value="3.0" oninput="updateER()" />
+          <div class="flex justify-between text-xs text-[var(--muted-foreground)] mt-1">
+            <span>0.1%</span><span>5%</span><span>10%</span><span>20%</span>
+          </div>
+          <div id="er-quality" class="mt-2 text-xs text-center py-1 px-3 rounded-full bg-[var(--background)] border border-[var(--border)] w-fit mx-auto text-[var(--muted-foreground)]">Rata-rata</div>
+        </div>
+
+        <!-- Niche -->
+        <div class="mb-5">
+          <label class="text-sm font-medium text-[var(--foreground)] block mb-2 tooltip">
+            Kategori / Niche
+            <span class="tip-text">Niche premium seperti Finance & Tech biasanya punya rate lebih tinggi</span>
+          </label>
+          <select id="niche-select" class="w-full" onchange="calculate()">
+            <option value="1.0">🌟 Lifestyle & Daily Vlog</option>
+            <option value="1.1">💄 Beauty & Fashion</option>
+            <option value="1.2">🍔 Food & Culinary</option>
+            <option value="1.3">✈️ Travel & Adventure</option>
+            <option value="1.4">💪 Health & Fitness</option>
+            <option value="1.5">💻 Tech & Gadget</option>
+            <option value="1.6">💰 Finance & Investing</option>
+            <option value="1.2">🎮 Gaming & Esports</option>
+            <option value="1.0">😂 Entertainment & Comedy</option>
+            <option value="1.3">📚 Education & Tutorial</option>
+            <option value="1.1">🏠 Home & Interior</option>
+            <option value="1.2">👶 Parenting & Family</option>
+          </select>
+        </div>
+
+        <!-- Location -->
+        <div class="mb-5">
+          <label class="text-sm font-medium text-[var(--foreground)] block mb-2">Lokasi / Market</label>
+          <select id="location-select" class="w-full" onchange="calculate()">
+            <option value="1.0">🇮🇩 Indonesia (IDR)</option>
+            <option value="1.5">🇸🇬 Singapore (SGD)</option>
+            <option value="2.0">🇺🇸 USA / Global (USD)</option>
+            <option value="1.3">🇲🇾 Malaysia (MYR)</option>
+            <option value="1.2">🇵🇭 Philippines (PHP)</option>
+          </select>
+        </div>
+
+        <!-- CPM Method Toggle -->
+        <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3">
+          <div class="text-xs font-semibold text-[var(--muted-foreground)] mb-1 uppercase tracking-wider">Metode Kalkulasi</div>
+          <div class="flex gap-2 mt-1">
+            <button id="method-standard" onclick="setMethod('standard')" class="flex-1 text-xs py-1 rounded-lg font-medium bg-[var(--primary)] text-[var(--primary-foreground)]">Standard</button>
+            <button id="method-cpm" onclick="setMethod('cpm')" class="flex-1 text-xs py-1 rounded-lg font-medium text-[var(--muted-foreground)] bg-[var(--card)] border border-[var(--border)]">CPM Based</button>
+          </div>
+          <div id="cpm-input-row" class="hidden mt-2">
+            <label class="text-xs text-[var(--muted-foreground)]">CPM (per 1000 impresi)</label>
+            <input type="number" id="cpm-value" class="number-input mt-1" value="50000" placeholder="50000" oninput="calculate()" />
+            <div class="text-xs text-[var(--muted-foreground)] mt-1">Rata-rata reach: ~20-30% dari followers</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Results Panel -->
+      <div>
+        <!-- Tier Info Card -->
+        <div id="tier-info" class="rate-card rounded-2xl p-4 mb-4 shadow-sm animate-fade">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-semibold text-[var(--foreground)]" id="tier-title">Micro Influencer</span>
+            <span id="tier-badge-large" class="badge tier-badge-micro">Micro</span>
+          </div>
+          <p class="text-xs text-[var(--muted-foreground)]" id="tier-desc">10K–100K followers. Memiliki komunitas yang engaged dan niche. Cocok untuk brand awareness lokal dan produk lifestyle.</p>
+        </div>
+
+        <!-- Content Type Rates -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm animate-fade">
+          <h3 class="font-semibold text-[var(--foreground)] mb-1 text-sm">💸 Estimasi Harga per Konten</h3>
+          <p class="text-xs text-[var(--muted-foreground)] mb-4" id="currency-note">dalam Rupiah (IDR)</p>
+
+          <div id="content-rates">
+            <!-- Filled by JS -->
+          </div>
+
+          <!-- Total Package -->
+          <div class="mt-4 pt-4 border-t border-[var(--border)]">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-sm font-semibold text-[var(--foreground)]">📦 Paket Full Campaign</span>
+            </div>
+            <div id="package-rates">
+              <!-- Filled by JS -->
+            </div>
+          </div>
+
+          <!-- Notes -->
+          <div class="mt-4 bg-[var(--background)] border border-[var(--border)] rounded-xl p-3">
+            <div class="text-xs font-semibold text-[var(--muted-foreground)] mb-2 uppercase tracking-wider">💡 Tips Negosiasi</div>
+            <ul class="text-xs text-[var(--muted-foreground)] space-y-1 list-none" id="tips-list">
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparison Table -->
+    <div class="mt-5 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm">
+      <h3 class="font-semibold text-[var(--foreground)] mb-4">📊 Tabel Tier Influencer</h3>
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs">
+          <thead>
+            <tr class="border-b border-[var(--border)]">
+              <th class="text-left py-2 px-2 text-[var(--muted-foreground)] font-semibold">Tier</th>
+              <th class="text-left py-2 px-2 text-[var(--muted-foreground)] font-semibold">Followers</th>
+              <th class="text-left py-2 px-2 text-[var(--muted-foreground)] font-semibold">IG Feed (IDR)</th>
+              <th class="text-left py-2 px-2 text-[var(--muted-foreground)] font-semibold">IG Reels (IDR)</th>
+              <th class="text-left py-2 px-2 text-[var(--muted-foreground)] font-semibold">TikTok Video (IDR)</th>
+              <th class="text-left py-2 px-2 text-[var(--muted-foreground)] font-semibold">ER Ideal</th>
+            </tr>
+          </thead>
+          <tbody id="tier-table-body">
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="mt-4 text-center text-xs text-[var(--muted-foreground)] pb-6">
+      ⚠️ Estimasi ini bersifat indikatif. Harga aktual dapat bervariasi tergantung negosiasi, kualitas konten, eksklusivitas, dan ketentuan brand.
+    </div>
+  </div>
+
+  <script>
+    let platform = 'ig';
+    let method = 'standard';
+
+    const TIERS = [
+      { name: 'Nano',  min: 1000,     max: 10000,    label: 'Nano',  badgeClass: 'tier-badge-nano',
+        desc: '1K–10K followers. Sangat niche dan trusted. Konversi tinggi karena komunitas sangat dekat.',
+        igFeedMin: 150000,   igFeedMax: 500000,
+        igReelMin: 200000,   igReelMax: 750000,
+        igStoryMin: 75000,   igStoryMax: 200000,
+        igCarouMin: 175000,  igCarouMax: 600000,
+        ttVideoMin: 200000,  ttVideoMax: 700000,
+        ttLiveMin:  100000,  ttLiveMax:  350000,
+        erIG: '5–9%', erTT: '7–12%',
+      },
+      { name: 'Micro', min: 10000,    max: 100000,   label: 'Micro', badgeClass: 'tier-badge-micro',
+        desc: '10K–100K followers. Memiliki komunitas yang engaged dan niche. Cocok untuk brand awareness lokal dan produk lifestyle.',
+        igFeedMin: 500000,   igFeedMax: 2500000,
+        igReelMin: 750000,   igReelMax: 4000000,
+        igStoryMin: 200000,  igStoryMax: 1000000,
+        igCarouMin: 600000,  igCarouMax: 3000000,
+        ttVideoMin: 700000,  ttVideoMax: 4500000,
+        ttLiveMin:  350000,  ttLiveMax:  1500000,
+        erIG: '3–6%', erTT: '5–9%',
+      },
+      { name: 'Mid',   min: 100000,   max: 500000,   label: 'Mid-tier', badgeClass: 'tier-badge-mid',
+        desc: '100K–500K followers. Jangkauan lebih luas dengan engagement solid. Pilihan ideal untuk campaign berskala nasional.',
+        igFeedMin: 2500000,  igFeedMax: 10000000,
+        igReelMin: 4000000,  igReelMax: 18000000,
+        igStoryMin: 1000000, igStoryMax: 4000000,
+        igCarouMin: 3000000, igCarouMax: 12000000,
+        ttVideoMin: 4500000, ttVideoMax: 20000000,
+        ttLiveMin:  1500000, ttLiveMax:  6000000,
+        erIG: '2–4%', erTT: '3–7%',
+      },
+      { name: 'Macro', min: 500000,   max: 1000000,  label: 'Macro', badgeClass: 'tier-badge-macro',
+        desc: '500K–1M followers. Reach masif dan brand awareness kuat. Sering dipakai untuk campaign produk nasional besar.',
+        igFeedMin: 10000000, igFeedMax: 30000000,
+        igReelMin: 18000000, igReelMax: 50000000,
+        igStoryMin: 4000000, igStoryMax: 12000000,
+        igCarouMin: 12000000,igCarouMax: 35000000,
+        ttVideoMin: 20000000,ttVideoMax: 60000000,
+        ttLiveMin:  6000000, ttLiveMax:  20000000,
+        erIG: '1.5–3%', erTT: '2–5%',
+      },
+      { name: 'Mega',  min: 1000000,  max: 100000000,label: 'Mega/Selebgram', badgeClass: 'tier-badge-mega',
+        desc: '1M+ followers. Selebriti digital. Rate premium dengan negosiasi khusus. Biasanya melibatkan agency.',
+        igFeedMin: 30000000, igFeedMax: 150000000,
+        igReelMin: 50000000, igReelMax: 250000000,
+        igStoryMin:12000000, igStoryMax: 60000000,
+        igCarouMin:35000000, igCarouMax: 180000000,
+        ttVideoMin:60000000, ttVideoMax: 300000000,
+        ttLiveMin: 20000000, ttLiveMax:  100000000,
+        erIG: '1–2%', erTT: '1–3%',
+      },
+    ];
+
+    const TIPS = {
+      ig: [
+        '📌 Sertakan usage rights agar harga bisa naik 30–50%',
+        '📌 Tambah fee eksklusivitas jika brand minta no competitor',
+        '📌 Story dengan link swipe-up lebih mahal karena CTA langsung',
+        '📌 Reels performatif bisa di-boost sebagai iklan, nego fee tambahan',
+      ],
+      tt: [
+        '📌 TikTok Spark Ads: tambah fee jika konten dipakai untuk iklan',
+        '📌 Video produk review biasanya 2–3x lebih mahal dari konten biasa',
+        '📌 Live selling: negosiasi per jam atau berdasarkan penjualan (komisi)',
+        '📌 Sound/jingle branding: tambah 20–40% dari harga video standar',
+      ],
+    };
+
+    function getTier(followers) {
+      return TIERS.find(t => followers >= t.min && followers < t.max) || TIERS[TIERS.length - 1];
+    }
+
+    function formatRp(val) {
+      if (val >= 1000000000) return 'Rp ' + (val / 1000000000).toFixed(1) + ' M';
+      if (val >= 1000000) return 'Rp ' + (val / 1000000).toFixed(1) + ' Jt';
+      if (val >= 1000) return 'Rp ' + (val / 1000).toFixed(0) + ' Rb';
+      return 'Rp ' + val.toLocaleString('id-ID');
+    }
+
+    function getERQuality(er, platform) {
+      const thresholds = platform === 'ig'
+        ? { low: 1, avg: 3, good: 6, excellent: 10 }
+        : { low: 2, avg: 5, good: 9, excellent: 14 };
+      if (er < thresholds.low) return { label: '⚠️ Sangat Rendah', color: '#ef4444' };
+      if (er < thresholds.avg) return { label: '😐 Di Bawah Rata-rata', color: '#f59e0b' };
+      if (er < thresholds.good) return { label: '✅ Rata-rata Baik', color: '#10b981' };
+      if (er < thresholds.excellent) return { label: '🔥 Sangat Bagus', color: '#8b5cf6' };
+      return { label: '🚀 Luar Biasa!', color: '#ec4899' };
+    }
+
+    function calculate() {
+      const followers = parseInt(document.getElementById('followers-input').value) || 50000;
+      const er = parseFloat(document.getElementById('er-slider').value);
+      const nicheMultiplier = parseFloat(document.getElementById('niche-select').value);
+      const locationMultiplier = parseFloat(document.getElementById('location-select').value);
+
+      const tier = getTier(followers);
+
+      // ER multiplier: above average = bonus, below = penalty
+      const baseER = platform === 'ig' ? 3.0 : 5.0;
+      const erMultiplier = Math.pow(er / baseER, 0.4); // gentle curve
+
+      const totalMult = nicheMultiplier * locationMultiplier * erMultiplier;
+
+      // Update tier display
+      document.getElementById('tier-badge').className = `badge ${tier.badgeClass}`;
+      document.getElementById('tier-badge').textContent = tier.label;
+      document.getElementById('tier-badge-large').className = `badge ${tier.badgeClass}`;
+      document.getElementById('tier-badge-large').textContent = tier.label;
+      document.getElementById('tier-title').textContent = tier.name + ' Influencer';
+      document.getElementById('tier-desc').textContent = tier.desc;
+
+      // CPM Method
+      let cpmRates = null;
+      if (method === 'cpm') {
+        const cpm = parseFloat(document.getElementById('cpm-value').value) || 50000;
+        const reachPct = 0.25; // ~25% reach
+        const impressions = followers * reachPct;
+        const cpmTotal = (impressions / 1000) * cpm;
+        cpmRates = {
+          base: cpmTotal,
+        };
+      }
+
+      const applyMult = (val) => Math.round(val * totalMult / 10000) * 10000;
+
+      let contentTypes = [];
+      let packages = [];
+
+      if (platform === 'ig') {
+        const feedMin = method === 'cpm' ? cpmRates.base * 0.8 : applyMult(tier.igFeedMin);
+        const feedMax = method === 'cpm' ? cpmRates.base * 1.2 : applyMult(tier.igFeedMax);
+        const reelMin = method === 'cpm' ? cpmRates.base * 1.2 : applyMult(tier.igReelMin);
+        const reelMax = method === 'cpm' ? cpmRates.base * 1.8 : applyMult(tier.igReelMax);
+        const storyMin = method === 'cpm' ? cpmRates.base * 0.4 : applyMult(tier.igStoryMin);
+        const storyMax = method === 'cpm' ? cpmRates.base * 0.6 : applyMult(tier.igStoryMax);
+        const carouMin = method === 'cpm' ? cpmRates.base * 0.9 : applyMult(tier.igCarouMin);
+        const carouMax = method === 'cpm' ? cpmRates.base * 1.4 : applyMult(tier.igCarouMax);
+
+        contentTypes = [
+          { icon: '🖼️', label: 'Feed Post (Single Photo)', min: feedMin, max: feedMax },
+          { icon: '🎬', label: 'Reels (Short Video)', min: reelMin, max: reelMax, highlight: true },
+          { icon: '📖', label: 'Story (per set 3 frame)', min: storyMin, max: storyMax },
+          { icon: '🃏', label: 'Carousel (Swipe Post)', min: carouMin, max: carouMax },
+        ];
+
+        packages = [
+          { icon: '🥉', label: 'Starter (1 Story + 1 Feed)', min: storyMin + feedMin, max: storyMax + feedMax },
+          { icon: '🥈', label: 'Standard (1 Feed + 1 Reels + 3 Story)', min: feedMin + reelMin + storyMin * 2, max: feedMax + reelMax + storyMax * 2 },
+          { icon: '🥇', label: 'Premium (2 Reels + 1 Carousel + 5 Story)', min: reelMin * 2 + carouMin + storyMin * 3, max: reelMax * 2 + carouMax + storyMax * 3 },
+        ];
+      } else {
+        const videoMin = method === 'cpm' ? cpmRates.base * 0.8 : applyMult(tier.ttVideoMin);
+        const videoMax = method === 'cpm' ? cpmRates.base * 1.2 : applyMult(tier.ttVideoMax);
+        const liveMin  = method === 'cpm' ? cpmRates.base * 0.5 : applyMult(tier.ttLiveMin);
+        const liveMax  = method === 'cpm' ? cpmRates.base * 0.8 : applyMult(tier.ttLiveMax);
+        const reviewMin = videoMin * 1.5;
+        const reviewMax = videoMax * 1.5;
+        const sparkMin = videoMin * 1.3;
+        const sparkMax = videoMax * 1.3;
+
+        contentTypes = [
+          { icon: '🎥', label: 'Video Organic (15–60s)', min: videoMin, max: videoMax, highlight: true },
+          { icon: '📢', label: 'Video Review Produk', min: reviewMin, max: reviewMax },
+          { icon: '⚡', label: 'Spark Ads (TikTok Ads Ready)', min: sparkMin, max: sparkMax },
+          { icon: '🔴', label: 'Live Streaming (per jam)', min: liveMin, max: liveMax },
+        ];
+
+        packages = [
+          { icon: '🥉', label: 'Basic (1 Video + 1 Live 1 jam)', min: videoMin + liveMin, max: videoMax + liveMax },
+          { icon: '🥈', label: 'Standard (2 Video + Spark Ads)', min: videoMin * 2 + sparkMin, max: videoMax * 2 + sparkMax },
+          { icon: '🥇', label: 'Full Campaign (3 Video + Review + Spark)', min: videoMin * 3 + reviewMin + sparkMin, max: videoMax * 3 + reviewMax + sparkMax },
+        ];
+      }
+
+      // Render content rates
+      const ratesHTML = contentTypes.map(ct => `
+        <div class="result-row ${ct.highlight ? 'border-[var(--primary)]' : ''}">
+          <div class="flex items-center gap-2">
+            <span>${ct.icon}</span>
+            <div>
+              <div class="text-xs font-medium text-[var(--foreground)]">${ct.label}</div>
+              ${ct.highlight ? '<div class="text-[10px] text-[var(--primary)] font-semibold">★ Paling Populer</div>' : ''}
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-xs font-bold text-[var(--foreground)]">${formatRp(ct.min)}</div>
+            <div class="text-[10px] text-[var(--muted-foreground)]">s/d ${formatRp(ct.max)}</div>
+          </div>
+        </div>
+      `).join('');
+
+      const packHTML = packages.map(pkg => `
+        <div class="result-row">
+          <div class="text-xs font-medium text-[var(--foreground)]">${pkg.icon} ${pkg.label}</div>
+          <div class="text-right">
+            <div class="text-xs font-bold text-[var(--foreground)]">${formatRp(pkg.min)}</div>
+            <div class="text-[10px] text-[var(--muted-foreground)]">s/d ${formatRp(pkg.max)}</div>
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('content-rates').innerHTML = ratesHTML;
+      document.getElementById('package-rates').innerHTML = packHTML;
+
+      // Tips
+      const tips = TIPS[platform];
+      document.getElementById('tips-list').innerHTML = tips.map(t => `<li>${t}</li>`).join('');
+
+      // Currency note
+      const loc = document.getElementById('location-select').value;
+      const locText = loc === '1.5' ? 'dalam SGD (estimasi ~×1.5 dari IDR)'
+        : loc === '2.0' ? 'dalam USD (estimasi ~×2 dari IDR)'
+        : loc === '1.3' ? 'dalam MYR (estimasi ~×1.3 dari IDR)'
+        : loc === '1.2' ? 'dalam PHP (estimasi ~×1.2 dari IDR)'
+        : 'dalam Rupiah (IDR)';
+      document.getElementById('currency-note').textContent = locText;
+
+      // ER quality
+      const erQ = getERQuality(er, platform);
+      const erEl = document.getElementById('er-quality');
+      erEl.textContent = erQ.label;
+      erEl.style.color = erQ.color;
+      erEl.style.borderColor = erQ.color;
+    }
+
+    function syncSlider() {
+      const val = parseInt(document.getElementById('followers-input').value) || 1000;
+      document.getElementById('followers-slider').value = Math.min(val, 10000000);
+      calculate();
+    }
+
+    function syncInput() {
+      const val = document.getElementById('followers-slider').value;
+      document.getElementById('followers-input').value = val;
+      calculate();
+    }
+
+    function updateER() {
+      const er = parseFloat(document.getElementById('er-slider').value);
+      document.getElementById('er-label').textContent = er.toFixed(1) + '%';
+      calculate();
+    }
+
+    function switchPlatform(p) {
+      platform = p;
+      document.getElementById('tab-ig').className = p === 'ig'
+        ? 'tab-btn active px-5 py-2 rounded-full font-semibold text-sm'
+        : 'tab-btn px-5 py-2 rounded-full font-semibold text-sm text-[var(--muted-foreground)] bg-[var(--card)] border border-[var(--border)]';
+      document.getElementById('tab-tt').className = p === 'tt'
+        ? 'tab-btn active px-5 py-2 rounded-full font-semibold text-sm'
+        : 'tab-btn px-5 py-2 rounded-full font-semibold text-sm text-[var(--muted-foreground)] bg-[var(--card)] border border-[var(--border)]';
+      document.getElementById('platform-header-ig').classList.toggle('hidden', p !== 'ig');
+      document.getElementById('platform-header-tt').classList.toggle('hidden', p !== 'tt');
+      calculate();
+    }
+
+    function setMethod(m) {
+      method = m;
+      document.getElementById('method-standard').className = m === 'standard'
+        ? 'flex-1 text-xs py-1 rounded-lg font-medium bg-[var(--primary)] text-[var(--primary-foreground)]'
+        : 'flex-1 text-xs py-1 rounded-lg font-medium text-[var(--muted-foreground)] bg-[var(--card)] border border-[var(--border)]';
+      document.getElementById('method-cpm').className = m === 'cpm'
+        ? 'flex-1 text-xs py-1 rounded-lg font-medium bg-[var(--primary)] text-[var(--primary-foreground)]'
+        : 'flex-1 text-xs py-1 rounded-lg font-medium text-[var(--muted-foreground)] bg-[var(--card)] border border-[var(--border)]';
+      document.getElementById('cpm-input-row').classList.toggle('hidden', m !== 'cpm');
+      calculate();
+    }
+
+    // Build Tier Table
+    function buildTierTable() {
+      const rows = TIERS.map(t => `
+        <tr class="border-b border-[var(--border)] hover:bg-[var(--accent)] transition-colors">
+          <td class="py-2 px-2"><span class="badge ${t.badgeClass}">${t.name}</span></td>
+          <td class="py-2 px-2 text-[var(--foreground)]">${t.min >= 1000000 ? (t.min/1000000)+'M+' : t.min >= 1000 ? (t.min/1000)+'K' : t.min} – ${t.max >= 1000000 ? (t.max/1000000)+'M' : (t.max/1000)+'K'}</td>
+          <td class="py-2 px-2 text-[var(--foreground)]">${formatRp(t.igFeedMin)} – ${formatRp(t.igFeedMax)}</td>
+          <td class="py-2 px-2 text-[var(--foreground)]">${formatRp(t.igReelMin)} – ${formatRp(t.igReelMax)}</td>
+          <td class="py-2 px-2 text-[var(--foreground)]">${formatRp(t.ttVideoMin)} – ${formatRp(t.ttVideoMax)}</td>
+          <td class="py-2 px-2"><div class="text-[var(--foreground)]">IG: ${t.erIG}</div><div class="text-[var(--muted-foreground)]">TT: ${t.erTT}</div></td>
+        </tr>
+      `).join('');
+      document.getElementById('tier-table-body').innerHTML = rows;
+    }
+
+    // Init
+    buildTierTable();
+    calculate();
+  </script>
+</body>
+</html>
