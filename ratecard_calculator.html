@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,6 +7,48 @@
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
   <style>
     * { box-sizing: border-box; }
+
+    /* ===== LIGHT THEME ===== */
+    :root, [data-theme="light"] {
+      --bg:           #f8fafc;
+      --card:         #ffffff;
+      --border:       #e2e8f0;
+      --foreground:   #0f172a;
+      --muted:        #64748b;
+      --primary:      #6366f1;
+      --primary-fg:   #ffffff;
+      --accent:       #f1f5f9;
+      --input-bg:     #f8fafc;
+      --result-bg:    #f8fafc;
+      --shadow:       rgba(0,0,0,0.06);
+    }
+
+    /* ===== DARK THEME ===== */
+    [data-theme="dark"] {
+      --bg:           #0f172a;
+      --card:         #1e293b;
+      --border:       #334155;
+      --foreground:   #f1f5f9;
+      --muted:        #94a3b8;
+      --primary:      #818cf8;
+      --primary-fg:   #0f172a;
+      --accent:       #1e293b;
+      --input-bg:     #0f172a;
+      --result-bg:    #0f172a;
+      --shadow:       rgba(0,0,0,0.3);
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--foreground);
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
 
     input[type=range] {
       -webkit-appearance: none;
@@ -17,6 +59,7 @@
       background: var(--border);
       outline: none;
       cursor: pointer;
+      transition: background 0.3s;
     }
     input[type=range]::-webkit-slider-thumb {
       -webkit-appearance: none;
@@ -39,15 +82,13 @@
 
     .tab-btn.active {
       background: var(--primary);
-      color: var(--primary-foreground);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      color: var(--primary-fg);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
     .tab-btn {
       transition: all 0.2s;
-    }
-
-    .rate-card {
-      background: linear-gradient(135deg, var(--card), var(--accent));
+      color: var(--muted);
+      background: var(--card);
       border: 1px solid var(--border);
     }
 
@@ -61,18 +102,23 @@
       letter-spacing: 0.05em;
       text-transform: uppercase;
     }
-
     .tier-badge-nano    { background: #d1fae5; color: #065f46; }
     .tier-badge-micro   { background: #dbeafe; color: #1e40af; }
     .tier-badge-mid     { background: #ede9fe; color: #5b21b6; }
     .tier-badge-macro   { background: #fef3c7; color: #92400e; }
     .tier-badge-mega    { background: #fee2e2; color: #991b1b; }
 
+    [data-theme="dark"] .tier-badge-nano  { background: #064e3b; color: #6ee7b7; }
+    [data-theme="dark"] .tier-badge-micro { background: #1e3a5f; color: #93c5fd; }
+    [data-theme="dark"] .tier-badge-mid   { background: #3b0764; color: #c4b5fd; }
+    [data-theme="dark"] .tier-badge-macro { background: #451a03; color: #fcd34d; }
+    [data-theme="dark"] .tier-badge-mega  { background: #450a0a; color: #fca5a5; }
+
     .ig-gradient { background: linear-gradient(135deg, #f9a8d4, #c084fc, #60a5fa); }
     .tt-gradient { background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); }
 
-    .number-input {
-      background: var(--background);
+    .number-input, select {
+      background: var(--input-bg);
       border: 1px solid var(--border);
       color: var(--foreground);
       border-radius: 8px;
@@ -80,11 +126,11 @@
       font-size: 0.9rem;
       width: 100%;
       outline: none;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, background 0.3s, color 0.3s;
     }
-    .number-input:focus {
-      border-color: var(--primary);
-    }
+    .number-input:focus, select:focus { border-color: var(--primary); }
+
+    select { padding: 6px 10px; font-size: 0.85rem; cursor: pointer; }
 
     .result-row {
       display: flex;
@@ -93,25 +139,24 @@
       padding: 10px 14px;
       border-radius: 10px;
       margin-bottom: 8px;
-      background: var(--background);
+      background: var(--result-bg);
       border: 1px solid var(--border);
+      transition: background 0.3s, border-color 0.3s;
     }
+    .result-row.highlight { border-color: var(--primary); }
 
-    .tooltip {
-      position: relative;
-      cursor: help;
-    }
+    .tooltip { position: relative; cursor: help; }
     .tooltip .tip-text {
       visibility: hidden;
       width: 200px;
       background: var(--foreground);
-      color: var(--background);
+      color: var(--bg);
       text-align: center;
       border-radius: 8px;
       padding: 6px 10px;
       font-size: 0.72rem;
       position: absolute;
-      z-index: 1;
+      z-index: 10;
       bottom: 125%;
       left: 50%;
       margin-left: -100px;
@@ -123,25 +168,75 @@
     .animate-fade { animation: fadeIn 0.3s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-    select {
-      background: var(--background);
+    /* Dark mode toggle button */
+    #theme-toggle {
+      background: var(--card);
       border: 1px solid var(--border);
       color: var(--foreground);
-      border-radius: 8px;
-      padding: 6px 10px;
-      font-size: 0.85rem;
-      outline: none;
+      border-radius: 9999px;
+      padding: 6px 14px;
       cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    #theme-toggle:hover { border-color: var(--primary); color: var(--primary); }
+
+    table { width: 100%; font-size: 0.75rem; border-collapse: collapse; }
+    th { text-align: left; padding: 8px; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--border); }
+    td { padding: 8px; color: var(--foreground); border-bottom: 1px solid var(--border); }
+    tr:hover td { background: var(--accent); transition: background 0.15s; }
+    tr:last-child td { border-bottom: none; }
+
+    .method-btn {
+      flex: 1;
+      font-size: 0.75rem;
+      padding: 4px 0;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+    .method-btn.active { background: var(--primary); color: var(--primary-fg); border-color: var(--primary); }
+    .method-btn:not(.active) { background: var(--card); color: var(--muted); }
+
+    .tier-info-card {
+      background: linear-gradient(135deg, var(--card), var(--accent));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    .section-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 6px;
     }
   </style>
 </head>
-<body class="bg-[var(--background)] text-[var(--foreground)] antialiased p-4 min-h-screen">
+<body class="antialiased p-4 min-h-screen">
 
-  <!-- Header -->
   <div class="max-w-4xl mx-auto">
-    <div class="text-center mb-6">
-      <h1 class="text-2xl font-bold text-[var(--foreground)] mb-1">💰 Kalkulator Ratecard Influencer</h1>
-      <p class="text-[var(--muted-foreground)] text-sm">Hitung estimasi harga endorsement Instagram & TikTok kamu</p>
+
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold" style="color:var(--foreground)">💰 Kalkulator Ratecard</h1>
+        <p class="text-sm" style="color:var(--muted)">Estimasi harga endorsement Instagram & TikTok</p>
+      </div>
+      <button id="theme-toggle" onclick="toggleTheme()">
+        <span id="theme-icon">🌙</span>
+        <span id="theme-label">Dark</span>
+      </button>
     </div>
 
     <!-- Platform Tab -->
@@ -149,45 +244,44 @@
       <button id="tab-ig" class="tab-btn active px-5 py-2 rounded-full font-semibold text-sm" onclick="switchPlatform('ig')">
         📸 Instagram
       </button>
-      <button id="tab-tt" class="tab-btn px-5 py-2 rounded-full font-semibold text-sm text-[var(--muted-foreground)] bg-[var(--card)] border border-[var(--border)]" onclick="switchPlatform('tt')">
+      <button id="tab-tt" class="tab-btn px-5 py-2 rounded-full font-semibold text-sm" onclick="switchPlatform('tt')">
         🎵 TikTok
       </button>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
       <!-- LEFT: Input Panel -->
-      <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm">
+      <div class="card rounded-2xl p-5 shadow-sm">
 
         <!-- Platform Header -->
         <div id="platform-header-ig" class="flex items-center gap-3 mb-5">
-          <div class="ig-gradient w-10 h-10 rounded-xl flex items-center justify-center text-white text-lg font-bold shadow">📸</div>
+          <div class="ig-gradient w-10 h-10 rounded-xl flex items-center justify-center text-white text-lg shadow">📸</div>
           <div>
-            <div class="font-semibold text-[var(--foreground)]">Instagram</div>
-            <div class="text-xs text-[var(--muted-foreground)]">Feed Post · Reels · Story · Carousel</div>
+            <div class="font-semibold" style="color:var(--foreground)">Instagram</div>
+            <div class="text-xs" style="color:var(--muted)">Feed · Reels · Story · Carousel</div>
           </div>
         </div>
         <div id="platform-header-tt" class="hidden flex items-center gap-3 mb-5">
-          <div class="tt-gradient w-10 h-10 rounded-xl flex items-center justify-center text-white text-lg font-bold shadow">🎵</div>
+          <div class="tt-gradient w-10 h-10 rounded-xl flex items-center justify-center text-white text-lg shadow">🎵</div>
           <div>
-            <div class="font-semibold text-[var(--foreground)]">TikTok</div>
-            <div class="text-xs text-[var(--muted-foreground)]">Video · Live · Branded Effect</div>
+            <div class="font-semibold" style="color:var(--foreground)">TikTok</div>
+            <div class="text-xs" style="color:var(--muted)">Video · Live · Spark Ads · Review</div>
           </div>
         </div>
 
         <!-- Followers -->
         <div class="mb-5">
           <div class="flex justify-between items-center mb-2">
-            <label class="text-sm font-medium text-[var(--foreground)] tooltip">
+            <label class="text-sm font-medium tooltip" style="color:var(--foreground)">
               Jumlah Followers
-              <span class="tip-text">Masukkan total followers akun kamu saat ini</span>
+              <span class="tip-text">Total followers akun kamu saat ini</span>
             </label>
             <span id="tier-badge" class="badge tier-badge-micro">Micro</span>
           </div>
-          <div class="flex items-center gap-3 mb-2">
-            <input type="number" id="followers-input" class="number-input" value="50000" min="1000" max="100000000" oninput="syncSlider()" />
-          </div>
+          <input type="number" id="followers-input" class="number-input mb-2" value="50000" min="1000" max="100000000" oninput="syncSlider()" />
           <input type="range" id="followers-slider" min="1000" max="10000000" step="1000" value="50000" oninput="syncInput()" />
-          <div class="flex justify-between text-xs text-[var(--muted-foreground)] mt-1">
+          <div class="flex justify-between text-xs mt-1" style="color:var(--muted)">
             <span>1K</span><span>100K</span><span>1M</span><span>10M+</span>
           </div>
         </div>
@@ -195,26 +289,26 @@
         <!-- Engagement Rate -->
         <div class="mb-5">
           <div class="flex justify-between items-center mb-2">
-            <label class="text-sm font-medium text-[var(--foreground)] tooltip">
+            <label class="text-sm font-medium tooltip" style="color:var(--foreground)">
               Engagement Rate (ER)
-              <span class="tip-text">ER = (Likes + Comments + Shares) / Followers × 100%. ER ideal: IG 3-6%, TT 5-9%</span>
+              <span class="tip-text">ER = (Likes+Comments+Shares) / Followers × 100%. Ideal: IG 3–6%, TT 5–9%</span>
             </label>
-            <span id="er-label" class="text-sm font-bold text-[var(--primary)]">3.0%</span>
+            <span id="er-label" class="text-sm font-bold" style="color:var(--primary)">3.0%</span>
           </div>
           <input type="range" id="er-slider" min="0.1" max="20" step="0.1" value="3.0" oninput="updateER()" />
-          <div class="flex justify-between text-xs text-[var(--muted-foreground)] mt-1">
+          <div class="flex justify-between text-xs mt-1" style="color:var(--muted)">
             <span>0.1%</span><span>5%</span><span>10%</span><span>20%</span>
           </div>
-          <div id="er-quality" class="mt-2 text-xs text-center py-1 px-3 rounded-full bg-[var(--background)] border border-[var(--border)] w-fit mx-auto text-[var(--muted-foreground)]">Rata-rata</div>
+          <div id="er-quality" class="mt-2 text-xs text-center py-1 px-3 rounded-full w-fit mx-auto" style="background:var(--result-bg);border:1px solid var(--border);color:var(--muted)">Rata-rata</div>
         </div>
 
         <!-- Niche -->
-        <div class="mb-5">
-          <label class="text-sm font-medium text-[var(--foreground)] block mb-2 tooltip">
+        <div class="mb-4">
+          <label class="text-sm font-medium block mb-2 tooltip" style="color:var(--foreground)">
             Kategori / Niche
-            <span class="tip-text">Niche premium seperti Finance & Tech biasanya punya rate lebih tinggi</span>
+            <span class="tip-text">Niche premium (Finance, Tech) biasanya rate lebih tinggi</span>
           </label>
-          <select id="niche-select" class="w-full" onchange="calculate()">
+          <select id="niche-select" onchange="calculate()">
             <option value="1.0">🌟 Lifestyle & Daily Vlog</option>
             <option value="1.1">💄 Beauty & Fashion</option>
             <option value="1.2">🍔 Food & Culinary</option>
@@ -232,8 +326,8 @@
 
         <!-- Location -->
         <div class="mb-5">
-          <label class="text-sm font-medium text-[var(--foreground)] block mb-2">Lokasi / Market</label>
-          <select id="location-select" class="w-full" onchange="calculate()">
+          <label class="text-sm font-medium block mb-2" style="color:var(--foreground)">Lokasi / Market</label>
+          <select id="location-select" onchange="calculate()">
             <option value="1.0">🇮🇩 Indonesia (IDR)</option>
             <option value="1.5">🇸🇬 Singapore (SGD)</option>
             <option value="2.0">🇺🇸 USA / Global (USD)</option>
@@ -242,344 +336,320 @@
           </select>
         </div>
 
-        <!-- CPM Method Toggle -->
-        <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3">
-          <div class="text-xs font-semibold text-[var(--muted-foreground)] mb-1 uppercase tracking-wider">Metode Kalkulasi</div>
-          <div class="flex gap-2 mt-1">
-            <button id="method-standard" onclick="setMethod('standard')" class="flex-1 text-xs py-1 rounded-lg font-medium bg-[var(--primary)] text-[var(--primary-foreground)]">Standard</button>
-            <button id="method-cpm" onclick="setMethod('cpm')" class="flex-1 text-xs py-1 rounded-lg font-medium text-[var(--muted-foreground)] bg-[var(--card)] border border-[var(--border)]">CPM Based</button>
+        <!-- Method -->
+        <div class="rounded-xl p-3" style="background:var(--result-bg);border:1px solid var(--border)">
+          <div class="section-label">Metode Kalkulasi</div>
+          <div class="flex gap-2">
+            <button id="method-standard" class="method-btn active" onclick="setMethod('standard')">Standard</button>
+            <button id="method-cpm" class="method-btn" onclick="setMethod('cpm')">CPM Based</button>
           </div>
-          <div id="cpm-input-row" class="hidden mt-2">
-            <label class="text-xs text-[var(--muted-foreground)]">CPM (per 1000 impresi)</label>
-            <input type="number" id="cpm-value" class="number-input mt-1" value="50000" placeholder="50000" oninput="calculate()" />
-            <div class="text-xs text-[var(--muted-foreground)] mt-1">Rata-rata reach: ~20-30% dari followers</div>
+          <div id="cpm-input-row" class="hidden mt-3">
+            <label class="text-xs" style="color:var(--muted)">CPM (per 1.000 impresi)</label>
+            <input type="number" id="cpm-value" class="number-input mt-1" value="50000" oninput="calculate()" />
+            <div class="text-xs mt-1" style="color:var(--muted)">Avg reach ~20–30% dari followers</div>
           </div>
         </div>
       </div>
 
       <!-- RIGHT: Results Panel -->
       <div>
-        <!-- Tier Info Card -->
-        <div id="tier-info" class="rate-card rounded-2xl p-4 mb-4 shadow-sm animate-fade">
-          <div class="flex items-center justify-between mb-2">
-            <span class="font-semibold text-[var(--foreground)]" id="tier-title">Micro Influencer</span>
+        <!-- Tier Card -->
+        <div class="tier-info-card animate-fade">
+          <div class="flex items-center justify-between mb-1">
+            <span class="font-semibold" id="tier-title" style="color:var(--foreground)">Micro Influencer</span>
             <span id="tier-badge-large" class="badge tier-badge-micro">Micro</span>
           </div>
-          <p class="text-xs text-[var(--muted-foreground)]" id="tier-desc">10K–100K followers. Memiliki komunitas yang engaged dan niche. Cocok untuk brand awareness lokal dan produk lifestyle.</p>
+          <p class="text-xs" id="tier-desc" style="color:var(--muted)">10K–100K followers. Komunitas engaged dan niche. Cocok untuk brand awareness lokal.</p>
         </div>
 
-        <!-- Content Type Rates -->
-        <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm animate-fade">
-          <h3 class="font-semibold text-[var(--foreground)] mb-1 text-sm">💸 Estimasi Harga per Konten</h3>
-          <p class="text-xs text-[var(--muted-foreground)] mb-4" id="currency-note">dalam Rupiah (IDR)</p>
+        <!-- Content Rates -->
+        <div class="card rounded-2xl p-5 shadow-sm animate-fade">
+          <h3 class="font-semibold text-sm mb-1" style="color:var(--foreground)">💸 Estimasi Harga per Konten</h3>
+          <p class="text-xs mb-4" id="currency-note" style="color:var(--muted)">dalam Rupiah (IDR)</p>
 
-          <div id="content-rates">
-            <!-- Filled by JS -->
-          </div>
+          <div id="content-rates"></div>
 
-          <!-- Total Package -->
-          <div class="mt-4 pt-4 border-t border-[var(--border)]">
+          <div class="mt-4 pt-4" style="border-top:1px solid var(--border)">
             <div class="flex justify-between items-center mb-2">
-              <span class="text-sm font-semibold text-[var(--foreground)]">📦 Paket Full Campaign</span>
+              <span class="text-sm font-semibold" style="color:var(--foreground)">📦 Paket Full Campaign</span>
             </div>
-            <div id="package-rates">
-              <!-- Filled by JS -->
-            </div>
+            <div id="package-rates"></div>
           </div>
 
-          <!-- Notes -->
-          <div class="mt-4 bg-[var(--background)] border border-[var(--border)] rounded-xl p-3">
-            <div class="text-xs font-semibold text-[var(--muted-foreground)] mb-2 uppercase tracking-wider">💡 Tips Negosiasi</div>
-            <ul class="text-xs text-[var(--muted-foreground)] space-y-1 list-none" id="tips-list">
-            </ul>
+          <!-- Tips -->
+          <div class="mt-4 rounded-xl p-3" style="background:var(--result-bg);border:1px solid var(--border)">
+            <div class="section-label">💡 Tips Negosiasi</div>
+            <ul class="text-xs space-y-1" id="tips-list" style="color:var(--muted)"></ul>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Comparison Table -->
-    <div class="mt-5 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm">
-      <h3 class="font-semibold text-[var(--foreground)] mb-4">📊 Tabel Tier Influencer</h3>
+    <div class="card rounded-2xl p-5 shadow-sm mt-5">
+      <h3 class="font-semibold mb-4" style="color:var(--foreground)">📊 Tabel Perbandingan Tier Influencer</h3>
       <div class="overflow-x-auto">
-        <table class="w-full text-xs">
+        <table>
           <thead>
-            <tr class="border-b border-[var(--border)]">
-              <th class="text-left py-2 px-2 text-[var(--muted-foreground)] font-semibold">Tier</th>
-              <th class="text-left py-2 px-2 text-[var(--muted-foreground)] font-semibold">Followers</th>
-              <th class="text-left py-2 px-2 text-[var(--muted-foreground)] font-semibold">IG Feed (IDR)</th>
-              <th class="text-left py-2 px-2 text-[var(--muted-foreground)] font-semibold">IG Reels (IDR)</th>
-              <th class="text-left py-2 px-2 text-[var(--muted-foreground)] font-semibold">TikTok Video (IDR)</th>
-              <th class="text-left py-2 px-2 text-[var(--muted-foreground)] font-semibold">ER Ideal</th>
+            <tr>
+              <th>Tier</th>
+              <th>Followers</th>
+              <th>IG Feed (IDR)</th>
+              <th>IG Reels (IDR)</th>
+              <th>TikTok Video (IDR)</th>
+              <th>ER Ideal</th>
             </tr>
           </thead>
-          <tbody id="tier-table-body">
-          </tbody>
+          <tbody id="tier-table-body"></tbody>
         </table>
       </div>
     </div>
 
     <!-- Disclaimer -->
-    <div class="mt-4 text-center text-xs text-[var(--muted-foreground)] pb-6">
-      ⚠️ Estimasi ini bersifat indikatif. Harga aktual dapat bervariasi tergantung negosiasi, kualitas konten, eksklusivitas, dan ketentuan brand.
+    <div class="mt-4 text-center text-xs pb-6" style="color:var(--muted)">
+      ⚠️ Estimasi indikatif. Harga aktual bervariasi tergantung negosiasi, kualitas konten, eksklusivitas, dan ketentuan brand.
     </div>
   </div>
 
   <script>
+    // ===== THEME =====
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      const next = isDark ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+      document.getElementById('theme-label').textContent = next === 'dark' ? 'Light' : 'Dark';
+    }
+
+    // Load saved theme
+    (function() {
+      const saved = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', saved);
+      document.getElementById('theme-icon').textContent = saved === 'dark' ? '☀️' : '🌙';
+      document.getElementById('theme-label').textContent = saved === 'dark' ? 'Light' : 'Dark';
+    })();
+
+    // ===== DATA =====
     let platform = 'ig';
     let method = 'standard';
 
     const TIERS = [
-      { name: 'Nano',  min: 1000,     max: 10000,    label: 'Nano',  badgeClass: 'tier-badge-nano',
+      { name: 'Nano',  min: 1000,    max: 10000,    label: 'Nano',        badgeClass: 'tier-badge-nano',
         desc: '1K–10K followers. Sangat niche dan trusted. Konversi tinggi karena komunitas sangat dekat.',
-        igFeedMin: 150000,   igFeedMax: 500000,
-        igReelMin: 200000,   igReelMax: 750000,
-        igStoryMin: 75000,   igStoryMax: 200000,
-        igCarouMin: 175000,  igCarouMax: 600000,
-        ttVideoMin: 200000,  ttVideoMax: 700000,
-        ttLiveMin:  100000,  ttLiveMax:  350000,
-        erIG: '5–9%', erTT: '7–12%',
-      },
-      { name: 'Micro', min: 10000,    max: 100000,   label: 'Micro', badgeClass: 'tier-badge-micro',
-        desc: '10K–100K followers. Memiliki komunitas yang engaged dan niche. Cocok untuk brand awareness lokal dan produk lifestyle.',
-        igFeedMin: 500000,   igFeedMax: 2500000,
-        igReelMin: 750000,   igReelMax: 4000000,
-        igStoryMin: 200000,  igStoryMax: 1000000,
-        igCarouMin: 600000,  igCarouMax: 3000000,
-        ttVideoMin: 700000,  ttVideoMax: 4500000,
-        ttLiveMin:  350000,  ttLiveMax:  1500000,
-        erIG: '3–6%', erTT: '5–9%',
-      },
-      { name: 'Mid',   min: 100000,   max: 500000,   label: 'Mid-tier', badgeClass: 'tier-badge-mid',
-        desc: '100K–500K followers. Jangkauan lebih luas dengan engagement solid. Pilihan ideal untuk campaign berskala nasional.',
-        igFeedMin: 2500000,  igFeedMax: 10000000,
-        igReelMin: 4000000,  igReelMax: 18000000,
-        igStoryMin: 1000000, igStoryMax: 4000000,
-        igCarouMin: 3000000, igCarouMax: 12000000,
-        ttVideoMin: 4500000, ttVideoMax: 20000000,
-        ttLiveMin:  1500000, ttLiveMax:  6000000,
-        erIG: '2–4%', erTT: '3–7%',
-      },
-      { name: 'Macro', min: 500000,   max: 1000000,  label: 'Macro', badgeClass: 'tier-badge-macro',
-        desc: '500K–1M followers. Reach masif dan brand awareness kuat. Sering dipakai untuk campaign produk nasional besar.',
-        igFeedMin: 10000000, igFeedMax: 30000000,
-        igReelMin: 18000000, igReelMax: 50000000,
-        igStoryMin: 4000000, igStoryMax: 12000000,
-        igCarouMin: 12000000,igCarouMax: 35000000,
-        ttVideoMin: 20000000,ttVideoMax: 60000000,
-        ttLiveMin:  6000000, ttLiveMax:  20000000,
-        erIG: '1.5–3%', erTT: '2–5%',
-      },
-      { name: 'Mega',  min: 1000000,  max: 100000000,label: 'Mega/Selebgram', badgeClass: 'tier-badge-mega',
-        desc: '1M+ followers. Selebriti digital. Rate premium dengan negosiasi khusus. Biasanya melibatkan agency.',
-        igFeedMin: 30000000, igFeedMax: 150000000,
-        igReelMin: 50000000, igReelMax: 250000000,
-        igStoryMin:12000000, igStoryMax: 60000000,
-        igCarouMin:35000000, igCarouMax: 180000000,
-        ttVideoMin:60000000, ttVideoMax: 300000000,
-        ttLiveMin: 20000000, ttLiveMax:  100000000,
-        erIG: '1–2%', erTT: '1–3%',
-      },
+        igFeedMin: 150000,    igFeedMax: 500000,
+        igReelMin: 200000,    igReelMax: 750000,
+        igStoryMin: 75000,    igStoryMax: 200000,
+        igCarouMin: 175000,   igCarouMax: 600000,
+        ttVideoMin: 200000,   ttVideoMax: 700000,
+        ttLiveMin: 100000,    ttLiveMax: 350000,
+        erIG: '5–9%', erTT: '7–12%' },
+      { name: 'Micro', min: 10000,   max: 100000,   label: 'Micro',       badgeClass: 'tier-badge-micro',
+        desc: '10K–100K followers. Komunitas engaged dan niche. Cocok untuk brand awareness lokal.',
+        igFeedMin: 500000,    igFeedMax: 2500000,
+        igReelMin: 750000,    igReelMax: 4000000,
+        igStoryMin: 200000,   igStoryMax: 1000000,
+        igCarouMin: 600000,   igCarouMax: 3000000,
+        ttVideoMin: 700000,   ttVideoMax: 4500000,
+        ttLiveMin: 350000,    ttLiveMax: 1500000,
+        erIG: '3–6%', erTT: '5–9%' },
+      { name: 'Mid',   min: 100000,  max: 500000,   label: 'Mid-tier',    badgeClass: 'tier-badge-mid',
+        desc: '100K–500K followers. Jangkauan luas dengan engagement solid. Ideal untuk campaign nasional.',
+        igFeedMin: 2500000,   igFeedMax: 10000000,
+        igReelMin: 4000000,   igReelMax: 18000000,
+        igStoryMin: 1000000,  igStoryMax: 4000000,
+        igCarouMin: 3000000,  igCarouMax: 12000000,
+        ttVideoMin: 4500000,  ttVideoMax: 20000000,
+        ttLiveMin: 1500000,   ttLiveMax: 6000000,
+        erIG: '2–4%', erTT: '3–7%' },
+      { name: 'Macro', min: 500000,  max: 1000000,  label: 'Macro',       badgeClass: 'tier-badge-macro',
+        desc: '500K–1M followers. Reach masif. Cocok untuk campaign produk nasional besar.',
+        igFeedMin: 10000000,  igFeedMax: 30000000,
+        igReelMin: 18000000,  igReelMax: 50000000,
+        igStoryMin: 4000000,  igStoryMax: 12000000,
+        igCarouMin: 12000000, igCarouMax: 35000000,
+        ttVideoMin: 20000000, ttVideoMax: 60000000,
+        ttLiveMin: 6000000,   ttLiveMax: 20000000,
+        erIG: '1.5–3%', erTT: '2–5%' },
+      { name: 'Mega',  min: 1000000, max: 1e9,      label: 'Mega',        badgeClass: 'tier-badge-mega',
+        desc: '1M+ followers. Selebriti digital. Rate premium dengan negosiasi khusus via agency.',
+        igFeedMin: 30000000,  igFeedMax: 150000000,
+        igReelMin: 50000000,  igReelMax: 250000000,
+        igStoryMin: 12000000, igStoryMax: 60000000,
+        igCarouMin: 35000000, igCarouMax: 180000000,
+        ttVideoMin: 60000000, ttVideoMax: 300000000,
+        ttLiveMin: 20000000,  ttLiveMax: 100000000,
+        erIG: '1–2%', erTT: '1–3%' },
     ];
 
     const TIPS = {
       ig: [
-        '📌 Sertakan usage rights agar harga bisa naik 30–50%',
+        '📌 Sertakan usage rights → harga bisa naik 30–50%',
         '📌 Tambah fee eksklusivitas jika brand minta no competitor',
         '📌 Story dengan link swipe-up lebih mahal karena CTA langsung',
-        '📌 Reels performatif bisa di-boost sebagai iklan, nego fee tambahan',
+        '📌 Reels bisa di-boost sebagai iklan → nego fee tambahan',
       ],
       tt: [
-        '📌 TikTok Spark Ads: tambah fee jika konten dipakai untuk iklan',
-        '📌 Video produk review biasanya 2–3x lebih mahal dari konten biasa',
-        '📌 Live selling: negosiasi per jam atau berdasarkan penjualan (komisi)',
+        '📌 Spark Ads: tambah fee jika konten dipakai untuk iklan berbayar',
+        '📌 Video review produk biasanya 2–3× lebih mahal dari konten biasa',
+        '📌 Live selling: negosiasi per jam atau komisi penjualan',
         '📌 Sound/jingle branding: tambah 20–40% dari harga video standar',
       ],
     };
 
-    function getTier(followers) {
-      return TIERS.find(t => followers >= t.min && followers < t.max) || TIERS[TIERS.length - 1];
+    function getTier(f) {
+      return TIERS.find(t => f >= t.min && f < t.max) || TIERS[TIERS.length - 1];
     }
 
-    function formatRp(val) {
-      if (val >= 1000000000) return 'Rp ' + (val / 1000000000).toFixed(1) + ' M';
-      if (val >= 1000000) return 'Rp ' + (val / 1000000).toFixed(1) + ' Jt';
+    function fmt(val) {
+      if (val >= 1e9)  return 'Rp ' + (val / 1e9).toFixed(1) + ' M';
+      if (val >= 1e6)  return 'Rp ' + (val / 1e6).toFixed(1) + ' Jt';
       if (val >= 1000) return 'Rp ' + (val / 1000).toFixed(0) + ' Rb';
       return 'Rp ' + val.toLocaleString('id-ID');
     }
 
-    function getERQuality(er, platform) {
-      const thresholds = platform === 'ig'
-        ? { low: 1, avg: 3, good: 6, excellent: 10 }
-        : { low: 2, avg: 5, good: 9, excellent: 14 };
-      if (er < thresholds.low) return { label: '⚠️ Sangat Rendah', color: '#ef4444' };
-      if (er < thresholds.avg) return { label: '😐 Di Bawah Rata-rata', color: '#f59e0b' };
-      if (er < thresholds.good) return { label: '✅ Rata-rata Baik', color: '#10b981' };
-      if (er < thresholds.excellent) return { label: '🔥 Sangat Bagus', color: '#8b5cf6' };
-      return { label: '🚀 Luar Biasa!', color: '#ec4899' };
+    function erQuality(er, plt) {
+      const t = plt === 'ig'
+        ? { low:1, avg:3, good:6, ex:10 }
+        : { low:2, avg:5, good:9, ex:14 };
+      if (er < t.low)  return { label: '⚠️ Sangat Rendah',       color: '#ef4444' };
+      if (er < t.avg)  return { label: '😐 Di Bawah Rata-rata',  color: '#f59e0b' };
+      if (er < t.good) return { label: '✅ Rata-rata Baik',       color: '#10b981' };
+      if (er < t.ex)   return { label: '🔥 Sangat Bagus',        color: '#8b5cf6' };
+      return             { label: '🚀 Luar Biasa!',             color: '#ec4899' };
     }
 
     function calculate() {
       const followers = parseInt(document.getElementById('followers-input').value) || 50000;
-      const er = parseFloat(document.getElementById('er-slider').value);
-      const nicheMultiplier = parseFloat(document.getElementById('niche-select').value);
-      const locationMultiplier = parseFloat(document.getElementById('location-select').value);
-
-      const tier = getTier(followers);
-
-      // ER multiplier: above average = bonus, below = penalty
-      const baseER = platform === 'ig' ? 3.0 : 5.0;
-      const erMultiplier = Math.pow(er / baseER, 0.4); // gentle curve
-
-      const totalMult = nicheMultiplier * locationMultiplier * erMultiplier;
+      const er        = parseFloat(document.getElementById('er-slider').value);
+      const nicheMult = parseFloat(document.getElementById('niche-select').value);
+      const locMult   = parseFloat(document.getElementById('location-select').value);
+      const tier      = getTier(followers);
+      const baseER    = platform === 'ig' ? 3.0 : 5.0;
+      const erMult    = Math.pow(er / baseER, 0.4);
+      const totalMult = nicheMult * locMult * erMult;
 
       // Update tier display
-      document.getElementById('tier-badge').className = `badge ${tier.badgeClass}`;
-      document.getElementById('tier-badge').textContent = tier.label;
-      document.getElementById('tier-badge-large').className = `badge ${tier.badgeClass}`;
-      document.getElementById('tier-badge-large').textContent = tier.label;
+      ['tier-badge','tier-badge-large'].forEach(id => {
+        document.getElementById(id).className = `badge ${tier.badgeClass}`;
+        document.getElementById(id).textContent = tier.label;
+      });
       document.getElementById('tier-title').textContent = tier.name + ' Influencer';
-      document.getElementById('tier-desc').textContent = tier.desc;
+      document.getElementById('tier-desc').textContent  = tier.desc;
 
-      // CPM Method
-      let cpmRates = null;
+      const apply = v => Math.round(v * totalMult / 10000) * 10000;
+
+      let cpmBase = 0;
       if (method === 'cpm') {
         const cpm = parseFloat(document.getElementById('cpm-value').value) || 50000;
-        const reachPct = 0.25; // ~25% reach
-        const impressions = followers * reachPct;
-        const cpmTotal = (impressions / 1000) * cpm;
-        cpmRates = {
-          base: cpmTotal,
-        };
+        cpmBase = (followers * 0.25 / 1000) * cpm;
       }
+      const c = method === 'cpm';
 
-      const applyMult = (val) => Math.round(val * totalMult / 10000) * 10000;
-
-      let contentTypes = [];
-      let packages = [];
+      let contentTypes, packages;
 
       if (platform === 'ig') {
-        const feedMin = method === 'cpm' ? cpmRates.base * 0.8 : applyMult(tier.igFeedMin);
-        const feedMax = method === 'cpm' ? cpmRates.base * 1.2 : applyMult(tier.igFeedMax);
-        const reelMin = method === 'cpm' ? cpmRates.base * 1.2 : applyMult(tier.igReelMin);
-        const reelMax = method === 'cpm' ? cpmRates.base * 1.8 : applyMult(tier.igReelMax);
-        const storyMin = method === 'cpm' ? cpmRates.base * 0.4 : applyMult(tier.igStoryMin);
-        const storyMax = method === 'cpm' ? cpmRates.base * 0.6 : applyMult(tier.igStoryMax);
-        const carouMin = method === 'cpm' ? cpmRates.base * 0.9 : applyMult(tier.igCarouMin);
-        const carouMax = method === 'cpm' ? cpmRates.base * 1.4 : applyMult(tier.igCarouMax);
+        const feedMin  = c ? cpmBase * 0.8  : apply(tier.igFeedMin);
+        const feedMax  = c ? cpmBase * 1.2  : apply(tier.igFeedMax);
+        const reelMin  = c ? cpmBase * 1.2  : apply(tier.igReelMin);
+        const reelMax  = c ? cpmBase * 1.8  : apply(tier.igReelMax);
+        const storyMin = c ? cpmBase * 0.4  : apply(tier.igStoryMin);
+        const storyMax = c ? cpmBase * 0.6  : apply(tier.igStoryMax);
+        const carouMin = c ? cpmBase * 0.9  : apply(tier.igCarouMin);
+        const carouMax = c ? cpmBase * 1.4  : apply(tier.igCarouMax);
 
         contentTypes = [
-          { icon: '🖼️', label: 'Feed Post (Single Photo)', min: feedMin, max: feedMax },
-          { icon: '🎬', label: 'Reels (Short Video)', min: reelMin, max: reelMax, highlight: true },
-          { icon: '📖', label: 'Story (per set 3 frame)', min: storyMin, max: storyMax },
-          { icon: '🃏', label: 'Carousel (Swipe Post)', min: carouMin, max: carouMax },
+          { icon:'🖼️', label:'Feed Post (Single Photo)',  min:feedMin,  max:feedMax },
+          { icon:'🎬', label:'Reels (Short Video)',        min:reelMin,  max:reelMax,  star:true },
+          { icon:'📖', label:'Story (per set 3 frame)',    min:storyMin, max:storyMax },
+          { icon:'🃏', label:'Carousel (Swipe Post)',      min:carouMin, max:carouMax },
         ];
-
         packages = [
-          { icon: '🥉', label: 'Starter (1 Story + 1 Feed)', min: storyMin + feedMin, max: storyMax + feedMax },
-          { icon: '🥈', label: 'Standard (1 Feed + 1 Reels + 3 Story)', min: feedMin + reelMin + storyMin * 2, max: feedMax + reelMax + storyMax * 2 },
-          { icon: '🥇', label: 'Premium (2 Reels + 1 Carousel + 5 Story)', min: reelMin * 2 + carouMin + storyMin * 3, max: reelMax * 2 + carouMax + storyMax * 3 },
+          { icon:'🥉', label:'Starter (1 Story + 1 Feed)',               min:storyMin+feedMin,                    max:storyMax+feedMax },
+          { icon:'🥈', label:'Standard (1 Feed + 1 Reels + 3 Story)',     min:feedMin+reelMin+storyMin*2,          max:feedMax+reelMax+storyMax*2 },
+          { icon:'🥇', label:'Premium (2 Reels + 1 Carousel + 5 Story)', min:reelMin*2+carouMin+storyMin*3,       max:reelMax*2+carouMax+storyMax*3 },
         ];
       } else {
-        const videoMin = method === 'cpm' ? cpmRates.base * 0.8 : applyMult(tier.ttVideoMin);
-        const videoMax = method === 'cpm' ? cpmRates.base * 1.2 : applyMult(tier.ttVideoMax);
-        const liveMin  = method === 'cpm' ? cpmRates.base * 0.5 : applyMult(tier.ttLiveMin);
-        const liveMax  = method === 'cpm' ? cpmRates.base * 0.8 : applyMult(tier.ttLiveMax);
-        const reviewMin = videoMin * 1.5;
-        const reviewMax = videoMax * 1.5;
-        const sparkMin = videoMin * 1.3;
-        const sparkMax = videoMax * 1.3;
+        const vidMin    = c ? cpmBase * 0.8 : apply(tier.ttVideoMin);
+        const vidMax    = c ? cpmBase * 1.2 : apply(tier.ttVideoMax);
+        const liveMin   = c ? cpmBase * 0.5 : apply(tier.ttLiveMin);
+        const liveMax   = c ? cpmBase * 0.8 : apply(tier.ttLiveMax);
+        const revMin    = vidMin * 1.5, revMax  = vidMax * 1.5;
+        const sparkMin  = vidMin * 1.3, sparkMax = vidMax * 1.3;
 
         contentTypes = [
-          { icon: '🎥', label: 'Video Organic (15–60s)', min: videoMin, max: videoMax, highlight: true },
-          { icon: '📢', label: 'Video Review Produk', min: reviewMin, max: reviewMax },
-          { icon: '⚡', label: 'Spark Ads (TikTok Ads Ready)', min: sparkMin, max: sparkMax },
-          { icon: '🔴', label: 'Live Streaming (per jam)', min: liveMin, max: liveMax },
+          { icon:'🎥', label:'Video Organic (15–60s)',          min:vidMin,   max:vidMax,   star:true },
+          { icon:'📢', label:'Video Review Produk',             min:revMin,   max:revMax },
+          { icon:'⚡', label:'Spark Ads (TikTok Ads Ready)',    min:sparkMin, max:sparkMax },
+          { icon:'🔴', label:'Live Streaming (per jam)',        min:liveMin,  max:liveMax },
         ];
-
         packages = [
-          { icon: '🥉', label: 'Basic (1 Video + 1 Live 1 jam)', min: videoMin + liveMin, max: videoMax + liveMax },
-          { icon: '🥈', label: 'Standard (2 Video + Spark Ads)', min: videoMin * 2 + sparkMin, max: videoMax * 2 + sparkMax },
-          { icon: '🥇', label: 'Full Campaign (3 Video + Review + Spark)', min: videoMin * 3 + reviewMin + sparkMin, max: videoMax * 3 + reviewMax + sparkMax },
+          { icon:'🥉', label:'Basic (1 Video + 1 Live 1 jam)',             min:vidMin+liveMin,               max:vidMax+liveMax },
+          { icon:'🥈', label:'Standard (2 Video + Spark Ads)',             min:vidMin*2+sparkMin,            max:vidMax*2+sparkMax },
+          { icon:'🥇', label:'Full Campaign (3 Video + Review + Spark)',   min:vidMin*3+revMin+sparkMin,     max:vidMax*3+revMax+sparkMax },
         ];
       }
 
-      // Render content rates
-      const ratesHTML = contentTypes.map(ct => `
-        <div class="result-row ${ct.highlight ? 'border-[var(--primary)]' : ''}">
+      document.getElementById('content-rates').innerHTML = contentTypes.map(ct => `
+        <div class="result-row${ct.star?' highlight':''}">
           <div class="flex items-center gap-2">
             <span>${ct.icon}</span>
             <div>
-              <div class="text-xs font-medium text-[var(--foreground)]">${ct.label}</div>
-              ${ct.highlight ? '<div class="text-[10px] text-[var(--primary)] font-semibold">★ Paling Populer</div>' : ''}
+              <div class="text-xs font-medium" style="color:var(--foreground)">${ct.label}</div>
+              ${ct.star ? '<div style="color:var(--primary);font-size:0.65rem;font-weight:700">★ Paling Populer</div>' : ''}
             </div>
           </div>
           <div class="text-right">
-            <div class="text-xs font-bold text-[var(--foreground)]">${formatRp(ct.min)}</div>
-            <div class="text-[10px] text-[var(--muted-foreground)]">s/d ${formatRp(ct.max)}</div>
+            <div class="text-xs font-bold" style="color:var(--foreground)">${fmt(ct.min)}</div>
+            <div style="font-size:0.65rem;color:var(--muted)">s/d ${fmt(ct.max)}</div>
           </div>
-        </div>
-      `).join('');
+        </div>`).join('');
 
-      const packHTML = packages.map(pkg => `
+      document.getElementById('package-rates').innerHTML = packages.map(p => `
         <div class="result-row">
-          <div class="text-xs font-medium text-[var(--foreground)]">${pkg.icon} ${pkg.label}</div>
+          <div class="text-xs font-medium" style="color:var(--foreground)">${p.icon} ${p.label}</div>
           <div class="text-right">
-            <div class="text-xs font-bold text-[var(--foreground)]">${formatRp(pkg.min)}</div>
-            <div class="text-[10px] text-[var(--muted-foreground)]">s/d ${formatRp(pkg.max)}</div>
+            <div class="text-xs font-bold" style="color:var(--foreground)">${fmt(p.min)}</div>
+            <div style="font-size:0.65rem;color:var(--muted)">s/d ${fmt(p.max)}</div>
           </div>
-        </div>
-      `).join('');
+        </div>`).join('');
 
-      document.getElementById('content-rates').innerHTML = ratesHTML;
-      document.getElementById('package-rates').innerHTML = packHTML;
+      document.getElementById('tips-list').innerHTML = TIPS[platform].map(t => `<li>${t}</li>`).join('');
 
-      // Tips
-      const tips = TIPS[platform];
-      document.getElementById('tips-list').innerHTML = tips.map(t => `<li>${t}</li>`).join('');
-
-      // Currency note
       const loc = document.getElementById('location-select').value;
-      const locText = loc === '1.5' ? 'dalam SGD (estimasi ~×1.5 dari IDR)'
-        : loc === '2.0' ? 'dalam USD (estimasi ~×2 dari IDR)'
-        : loc === '1.3' ? 'dalam MYR (estimasi ~×1.3 dari IDR)'
-        : loc === '1.2' ? 'dalam PHP (estimasi ~×1.2 dari IDR)'
-        : 'dalam Rupiah (IDR)';
-      document.getElementById('currency-note').textContent = locText;
+      document.getElementById('currency-note').textContent =
+        loc === '1.5' ? 'dalam SGD (×1.5 dari IDR)' :
+        loc === '2.0' ? 'dalam USD (×2 dari IDR)' :
+        loc === '1.3' ? 'dalam MYR (×1.3 dari IDR)' :
+        loc === '1.2' ? 'dalam PHP (×1.2 dari IDR)' :
+        'dalam Rupiah (IDR)';
 
-      // ER quality
-      const erQ = getERQuality(er, platform);
+      const q = erQuality(er, platform);
       const erEl = document.getElementById('er-quality');
-      erEl.textContent = erQ.label;
-      erEl.style.color = erQ.color;
-      erEl.style.borderColor = erQ.color;
+      erEl.textContent = q.label;
+      erEl.style.color = q.color;
+      erEl.style.borderColor = q.color;
     }
 
     function syncSlider() {
-      const val = parseInt(document.getElementById('followers-input').value) || 1000;
-      document.getElementById('followers-slider').value = Math.min(val, 10000000);
+      const v = parseInt(document.getElementById('followers-input').value) || 1000;
+      document.getElementById('followers-slider').value = Math.min(v, 10000000);
       calculate();
     }
-
     function syncInput() {
-      const val = document.getElementById('followers-slider').value;
-      document.getElementById('followers-input').value = val;
+      document.getElementById('followers-input').value = document.getElementById('followers-slider').value;
       calculate();
     }
-
     function updateER() {
-      const er = parseFloat(document.getElementById('er-slider').value);
-      document.getElementById('er-label').textContent = er.toFixed(1) + '%';
+      document.getElementById('er-label').textContent = parseFloat(document.getElementById('er-slider').value).toFixed(1) + '%';
       calculate();
     }
 
     function switchPlatform(p) {
       platform = p;
-      document.getElementById('tab-ig').className = p === 'ig'
-        ? 'tab-btn active px-5 py-2 rounded-full font-semibold text-sm'
-        : 'tab-btn px-5 py-2 rounded-full font-semibold text-sm text-[var(--muted-foreground)] bg-[var(--card)] border border-[var(--border)]';
-      document.getElementById('tab-tt').className = p === 'tt'
-        ? 'tab-btn active px-5 py-2 rounded-full font-semibold text-sm'
-        : 'tab-btn px-5 py-2 rounded-full font-semibold text-sm text-[var(--muted-foreground)] bg-[var(--card)] border border-[var(--border)]';
+      document.getElementById('tab-ig').className = `tab-btn${p==='ig'?' active':''} px-5 py-2 rounded-full font-semibold text-sm`;
+      document.getElementById('tab-tt').className = `tab-btn${p==='tt'?' active':''} px-5 py-2 rounded-full font-semibold text-sm`;
       document.getElementById('platform-header-ig').classList.toggle('hidden', p !== 'ig');
       document.getElementById('platform-header-tt').classList.toggle('hidden', p !== 'tt');
       calculate();
@@ -587,33 +657,25 @@
 
     function setMethod(m) {
       method = m;
-      document.getElementById('method-standard').className = m === 'standard'
-        ? 'flex-1 text-xs py-1 rounded-lg font-medium bg-[var(--primary)] text-[var(--primary-foreground)]'
-        : 'flex-1 text-xs py-1 rounded-lg font-medium text-[var(--muted-foreground)] bg-[var(--card)] border border-[var(--border)]';
-      document.getElementById('method-cpm').className = m === 'cpm'
-        ? 'flex-1 text-xs py-1 rounded-lg font-medium bg-[var(--primary)] text-[var(--primary-foreground)]'
-        : 'flex-1 text-xs py-1 rounded-lg font-medium text-[var(--muted-foreground)] bg-[var(--card)] border border-[var(--border)]';
+      document.getElementById('method-standard').classList.toggle('active', m === 'standard');
+      document.getElementById('method-cpm').classList.toggle('active', m === 'cpm');
       document.getElementById('cpm-input-row').classList.toggle('hidden', m !== 'cpm');
       calculate();
     }
 
-    // Build Tier Table
-    function buildTierTable() {
-      const rows = TIERS.map(t => `
-        <tr class="border-b border-[var(--border)] hover:bg-[var(--accent)] transition-colors">
-          <td class="py-2 px-2"><span class="badge ${t.badgeClass}">${t.name}</span></td>
-          <td class="py-2 px-2 text-[var(--foreground)]">${t.min >= 1000000 ? (t.min/1000000)+'M+' : t.min >= 1000 ? (t.min/1000)+'K' : t.min} – ${t.max >= 1000000 ? (t.max/1000000)+'M' : (t.max/1000)+'K'}</td>
-          <td class="py-2 px-2 text-[var(--foreground)]">${formatRp(t.igFeedMin)} – ${formatRp(t.igFeedMax)}</td>
-          <td class="py-2 px-2 text-[var(--foreground)]">${formatRp(t.igReelMin)} – ${formatRp(t.igReelMax)}</td>
-          <td class="py-2 px-2 text-[var(--foreground)]">${formatRp(t.ttVideoMin)} – ${formatRp(t.ttVideoMax)}</td>
-          <td class="py-2 px-2"><div class="text-[var(--foreground)]">IG: ${t.erIG}</div><div class="text-[var(--muted-foreground)]">TT: ${t.erTT}</div></td>
-        </tr>
-      `).join('');
-      document.getElementById('tier-table-body').innerHTML = rows;
+    function buildTable() {
+      document.getElementById('tier-table-body').innerHTML = TIERS.map(t => `
+        <tr>
+          <td><span class="badge ${t.badgeClass}">${t.name}</span></td>
+          <td>${t.min >= 1e6 ? (t.min/1e6)+'M+' : t.min >= 1000 ? (t.min/1000)+'K' : t.min}–${t.max >= 1e6 ? (t.max/1e6)+'M' : t.max >= 1000 ? (t.max/1000)+'K' : t.max}</td>
+          <td>${fmt(t.igFeedMin)}–${fmt(t.igFeedMax)}</td>
+          <td>${fmt(t.igReelMin)}–${fmt(t.igReelMax)}</td>
+          <td>${fmt(t.ttVideoMin)}–${fmt(t.ttVideoMax)}</td>
+          <td><div>IG: ${t.erIG}</div><div style="color:var(--muted);font-size:0.7rem">TT: ${t.erTT}</div></td>
+        </tr>`).join('');
     }
 
-    // Init
-    buildTierTable();
+    buildTable();
     calculate();
   </script>
 </body>
